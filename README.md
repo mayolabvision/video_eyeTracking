@@ -1,12 +1,11 @@
 # video_eyeTracking_ECoG
 
-1. Make a new Python environment
+1. Make a new Python environment with set version and additional packages
 ```buildoutcfg
-# Sets python version, adds necessary packages
 conda create -n "eyedetect" python=3.11.4 ffmpeg tqdm dlib
 ```
+Activate new environment called "eyedetect"
 ```buildoutcfg
-# Activate new environment called "eyedetect"
 conda activate eyedetect
 ```
 

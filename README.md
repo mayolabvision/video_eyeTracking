@@ -16,3 +16,7 @@ pip install opencv-python
 ```buildoutcfg
 pip install --upgrade mediapipe
 ```
+```buildoutcfg
+brew install wget
+```
+

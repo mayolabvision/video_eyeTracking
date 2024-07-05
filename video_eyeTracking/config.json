@@ -1,6 +1,5 @@
 {
     "data_path": "/Users/kendranoneman/OneDrive/ecog_data",
-    "output_path": "/Users/kendranoneman/OneDrive/ecog_data",
     "crop_video_based_on_face_detection": true,
     "helpers_to_run": ["extract_video_info"]
 }

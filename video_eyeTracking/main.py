@@ -2,9 +2,9 @@ import os
 import json
 import argparse
 import time
-from face_gazeTracking.calibration import crop_video_based_on_face_detection, find_optimal_confidences, calibrate_blink_threshold
-from face_gazeTracking.utils import extract_video_info
-from face_gazeTracking.output import export_video
+from video_eyeTracking.calibration import crop_video_based_on_face_detection, find_optimal_confidences, calibrate_blink_threshold
+from video_eyeTracking.utils import make_output_directory, extract_video_info
+from video_eyeTracking.output import export_video
 
 def load_config(config_path=None):
     if config_path is None:
@@ -30,8 +30,9 @@ def main():
         data_path = config["data_path"]
         video_path = os.path.join(data_path, args.video_relative_path)
 
-    output_path = config["output_path"]
-    
+    output_path = make_output_directory(video_path)
+    print(output_path)
+
     # Step 1: Getting video parameters (based on specific project)
     print('------------ EXTRACTING PATIENT INFO ------------')
     if "extract_video_info" in config.get("helpers_to_run", []):
@@ -41,17 +42,15 @@ def main():
     # Step 2: Cropping video to face coordinates
     print('------------ CROPPING VIDEO TO FACE ------------')
     if config.get("crop_video_based_on_face_detection", False):
-        face_crop_coords = crop_video_based_on_face_detection(video_path, showVideo=1)
+        face_crop_coords = crop_video_based_on_face_detection(video_path, output_path=output_path, showVideo=1)
         print(f"Crop coordinates: {face_crop_coords}")
     else:
         face_crop_coords = None
-    time.sleep(10)
+    time.sleep(3)
 
-
-    print(asdlkjfdask)
     # Step 3: 
     print('------------ OPTIMIZING CONFIDENCE THRESHOLDS ------------')
-    min_detection_confidence, min_tracking_confidence = find_optimal_confidences(video_path, face_crop_coords, showVideo=1)
+    min_detection_confidence, min_tracking_confidence = find_optimal_confidences(video_path, face_crop_coords, showVideo=0)
     print(f"Detection Confidence: {min_detection_confidence}, Tracking Confidence: {min_tracking_confidence}")
 
     time.sleep(3)

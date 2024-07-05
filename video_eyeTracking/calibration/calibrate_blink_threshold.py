@@ -1,4 +1,3 @@
-import random
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
@@ -6,8 +5,6 @@ import numpy as np
 RIGHT_EYE_POINTS = [33, 160, 159, 158, 133, 153, 145, 144]
 LEFT_EYE_POINTS = [362, 385, 386, 387, 263, 373, 374, 380]
 
-MIN_CONFIDENCE_THRESHOLD = 0.5
-CONFIDENCE_STEP = 0.05
 EYE_AR_CONSEC_FRAMES = 2
 
 def euclidean_distance_3D(points):
@@ -35,7 +32,7 @@ def blinking_ratio(landmarks):
 
     return ratio
 
-def calibrate_blink_threshold(video_path, face_crop_coords, min_detection_confidence=0.75, min_tracking_confidence=0.75,  duration=30, repeats=3, showVideo=0):
+def calibrate_blink_threshold(video_path, face_crop_coords, min_detection_confidence=0.75, min_tracking_confidence=0.75, duration=20, repeats=5, showVideo=0):
     """
     Calibrates the blink threshold based on the input video.
 
@@ -51,113 +48,116 @@ def calibrate_blink_threshold(video_path, face_crop_coords, min_detection_confid
     Returns:
         float: The calculated blink threshold.
     """
-    while min_detection_confidence >= MIN_CONFIDENCE_THRESHOLD:
-        all_blink_ratios = []
+    # Define the number of segments based on repeats
+    cap = cv.VideoCapture(video_path)
+    fps = int(cap.get(cv.CAP_PROP_FPS))
+    num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    duration_frames = int(fps * duration)
+    segments = max(1, repeats)  # Ensure there is at least one segment
+    possible_starts = [i * (num_frames - duration_frames) // (segments - 1) for i in range(segments)]
 
-        for _ in range(repeats):
-            mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
-                max_num_faces=1,
-                refine_landmarks=True,
-                min_detection_confidence=min_detection_confidence,
-                min_tracking_confidence=min_tracking_confidence
-            )
+    # Loop through each snippet of the video 
+    all_blink_ratios = []
+    for start_frame in possible_starts:
+        mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
+            max_num_faces=1,
+            refine_landmarks=True,
+            min_detection_confidence=min_detection_confidence,
+            min_tracking_confidence=min_tracking_confidence
+        )
 
-            cap = cv.VideoCapture(video_path)
-            fps = int(cap.get(cv.CAP_PROP_FPS))
-            num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+        cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)
+        xmin, ymin, xmax, ymax = face_crop_coords
 
-            duration_frames = int(fps * duration)
-            start_frame = random.randint(0, max(0, num_frames - duration_frames))
-            cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)
+        for _ in range(duration_frames):
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-            xmin, ymin, xmax, ymax = face_crop_coords
+            cropped_frame = frame[ymin:ymax, xmin:xmax]
+            frame_rgb = cv.cvtColor(cropped_frame, cv.COLOR_BGR2RGB)
+            results = mp_face_mesh.process(frame_rgb)
 
-            for _ in range(duration_frames):
-                ret, frame = cap.read()
-                if not ret:
-                    break
+            if results.multi_face_landmarks:
+                img_h, img_w, _ = cropped_frame.shape
+                for face_landmarks in results.multi_face_landmarks:
+                    mesh_points_3D = np.array([[p.x * img_w, p.y * img_h, p.z * img_w] for p in face_landmarks.landmark])
 
-                cropped_frame = frame[ymin:ymax, xmin:xmax]
-                frame_rgb = cv.cvtColor(cropped_frame, cv.COLOR_BGR2RGB)
-                results = mp_face_mesh.process(frame_rgb)
+                    eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
+                    all_blink_ratios.append(eyes_aspect_ratio)
+                    print(f"Detected eyes aspect ratio: {eyes_aspect_ratio}")
 
-                if results.multi_face_landmarks:
-                    img_h, img_w, _ = cropped_frame.shape
-                    for face_landmarks in results.multi_face_landmarks:
-                        mesh_points_3D = np.array([[p.x * img_w, p.y * img_h, p.z * img_w] for p in face_landmarks.landmark])
+                    if showVideo == 1:
+                        for landmark in face_landmarks.landmark:
+                            x = int(landmark.x * img_w)
+                            y = int(landmark.y * img_h)
+                            cv.circle(cropped_frame, (x, y), 1, (255, 0, 0), -1)
 
-                        eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
-                        all_blink_ratios.append(eyes_aspect_ratio)
+                        cv.putText(cropped_frame, f'Blink Ratio: {eyes_aspect_ratio:.3f}', (10, 30),
+                                   cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv.LINE_AA)
 
-                        if showVideo == 1:
-                            for landmark in face_landmarks.landmark:
-                                x = int(landmark.x * img_w)
-                                y = int(landmark.y * img_h)
-                                cv.circle(cropped_frame, (x, y), 1, (255, 0, 0), -1)
+                        cv.imshow('Blink Calibration', cropped_frame)
+                        if cv.waitKey(1) & 0xFF == ord('q'):
+                            break
 
-                            cv.putText(cropped_frame, f'Blink Ratio: {eyes_aspect_ratio:.3f}', (10, 30),
-                                       cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv.LINE_AA)
+    cap.release()
+    cv.destroyAllWindows()
 
-                            cv.imshow('Blink Calibration', cropped_frame)
-                            if cv.waitKey(1) & 0xFF == ord('q'):
-                                break
+    if all_blink_ratios:
+        mean_blink_ratio = np.mean(all_blink_ratios)
+        std_blink_ratio = np.std(all_blink_ratios)
+        blink_threshold = mean_blink_ratio - std_blink_ratio  # Adaptive threshold based on mean and standard deviation
 
-            cap.release()
-            cv.destroyAllWindows()
+        print(f"Mean blink ratio: {mean_blink_ratio}")
+        print(f"Standard deviation of blink ratio: {std_blink_ratio}")
+        print(f"Calculated blink threshold: {blink_threshold}")
 
-        if all_blink_ratios:
-            mean_blink_ratio = np.mean(all_blink_ratios)
-            std_blink_ratio = np.std(all_blink_ratios)
-            blink_threshold = mean_blink_ratio - std_blink_ratio  # Adaptive threshold based on mean and standard deviation
+        # Ensure the threshold is within reasonable bounds
+        blink_threshold = max(0, min(blink_threshold, 1))
 
-            # Ensure the threshold is within reasonable bounds
-            blink_threshold = max(0, min(blink_threshold, 1))
+        # Show a snippet of the video with blink detection
+        cap = cv.VideoCapture(video_path)
+        cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)  # Start from the same frame
 
-            # Show a snippet of the video with blink detection
-            cap = cv.VideoCapture(video_path)
-            cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)  # Start from the same frame
+        eyes_blink_frame_counter = 0
+        total_blinks = 0
 
-            eyes_blink_frame_counter = 0
-            total_blinks = 0
+        for _ in range(duration_frames):
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-            for _ in range(duration_frames):
-                ret, frame = cap.read()
-                if not ret:
-                    break
+            cropped_frame = frame[ymin:ymax, xmin:xmax]
+            frame_rgb = cv.cvtColor(cropped_frame, cv.COLOR_BGR2RGB)
+            results = mp_face_mesh.process(frame_rgb)
 
-                cropped_frame = frame[ymin:ymax, xmin:xmax]
-                frame_rgb = cv.cvtColor(cropped_frame, cv.COLOR_BGR2RGB)
-                results = mp_face_mesh.process(frame_rgb)
+            if results.multi_face_landmarks:
+                img_h, img_w, _ = cropped_frame.shape
+                for face_landmarks in results.multi_face_landmarks:
+                    mesh_points_3D = np.array([[p.x * img_w, p.y * img_h, p.z * img_w] for p in face_landmarks.landmark])
 
-                if results.multi_face_landmarks:
-                    img_h, img_w, _ = cropped_frame.shape
-                    for face_landmarks in results.multi_face_landmarks:
-                        mesh_points_3D = np.array([[p.x * img_w, p.y * img_h, p.z * img_w] for p in face_landmarks.landmark])
+                    eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
 
-                        eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
-
-                        if eyes_aspect_ratio <= blink_threshold:
-                            eyes_blink_frame_counter += 1
-                        else:
-                            if eyes_blink_frame_counter > EYE_AR_CONSEC_FRAMES:
-                                total_blinks += 1
-                                cv.putText(cropped_frame, "BLINK", (img_w - 100, img_h - 20),
-                                           cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2, cv.LINE_AA)
+                    if eyes_aspect_ratio <= blink_threshold:
+                        eyes_blink_frame_counter += 1
+                    else:
+                        if eyes_blink_frame_counter > EYE_AR_CONSEC_FRAMES:
+                            total_blinks += 1
                             eyes_blink_frame_counter = 0
+                            cv.putText(cropped_frame, "BLINK", (img_w - 100, img_h - 20),
+                                       cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2, cv.LINE_AA)
 
-                        if showVideo == 1:
-                            cv.imshow('Blink Detection', cropped_frame)
-                            if cv.waitKey(1) & 0xFF == ord('q'):
-                                break
+                    if showVideo == 1:
+                        cv.imshow('Blink Detection', cropped_frame)
+                        if cv.waitKey(1) & 0xFF == ord('q'):
+                            break
 
-            cap.release()
-            cv.destroyAllWindows()
+        cap.release()
+        cv.destroyAllWindows()
 
-            return blink_threshold
-        else:
-            min_detection_confidence -= CONFIDENCE_STEP
-
-    return None
+        return blink_threshold
+    else:
+        return None
 
 # Example usage:
 # video_path = "path/to/your/video.avi"

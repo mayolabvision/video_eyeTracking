@@ -11,21 +11,18 @@ def evaluate_confidences(confidences, video_path, face_crop_coords, duration=30,
 
     # Define the number of segments based on repeats
     cap = cv.VideoCapture(video_path)
-    duration_frames = int(int(cap.get(cv.CAP_PROP_FPS)) * duration)
+    fps = int(cap.get(cv.CAP_PROP_FPS))
+    num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+
+    duration_frames = int(fps * duration)
     segments = max(1, repeats)  # Ensure there is at least one segment
-    possible_starts = [i * (int(cap.get(cv.CAP_PROP_FRAME_COUNT)) - duration_frames) // (segments - 1) for i in range(segments)]
-    cap.release()
-    cv.destroyAllWindows()
+    possible_starts = [i * (num_frames - duration_frames) // (segments - 1) for i in range(segments)]
 
     # Loop through each snippet of the video 
     detection_rates = []
     for start_frame in possible_starts:
         # Load the video
-        cap = cv.VideoCapture(video_path)
-        fps = int(cap.get(cv.CAP_PROP_FPS))
-        num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-
-        duration_frames = int(fps * duration)
+        #cap = cv.VideoCapture(video_path)
         cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)
 
         xmin, ymin, xmax, ymax = face_crop_coords
@@ -53,8 +50,8 @@ def evaluate_confidences(confidences, video_path, face_crop_coords, duration=30,
         detection_rate = detected_frames / duration_frames
         detection_rates.append(detection_rate)
 
-        cap.release()
-        cv.destroyAllWindows()
+    cap.release()
+    cv.destroyAllWindows()
 
     mean_detection_rate = np.mean(detection_rates)
     # We want to maximize detection_confidence and tracking_confidence, but ensure detection rate is >= 0.95
@@ -62,6 +59,7 @@ def evaluate_confidences(confidences, video_path, face_crop_coords, duration=30,
         return -mean_detection_rate  # Higher detection rate should result in a lower (better) objective value
     else:
         return 1.0  # A high value indicating this combination is not acceptable
+
 
 def find_optimal_confidences(video_path, face_crop_coords, duration=30, repeats=5, min_confidence_threshold=0.75, showVideo=0):
     # Define the search space for Bayesian Optimization
@@ -71,8 +69,8 @@ def find_optimal_confidences(video_path, face_crop_coords, duration=30, repeats=
     def objective(**params):
         return evaluate_confidences([params['detection_confidence'], params['tracking_confidence']], video_path, face_crop_coords, duration, repeats)
 
-    # Perform Bayesian optimization
-    res = gp_minimize(objective, space, n_calls=10, n_initial_points=5, acq_func='gp_hedge', random_state=0)
+    # Perform Bayesian optimization with lbfgs acquisition optimizer and multiple cores
+    res = gp_minimize(objective, space, n_calls=10, n_initial_points=10, acq_func='gp_hedge', acq_optimizer='lbfgs', n_jobs=-1, random_state=0)
 
     optimal_detection_confidence, optimal_tracking_confidence = res.x
 
@@ -82,6 +80,7 @@ def find_optimal_confidences(video_path, face_crop_coords, duration=30, repeats=
             print("Early stopping: Optimization has converged.")
 
     if showVideo == 1:
+        cv.destroyAllWindows()
         cap = cv.VideoCapture(video_path)
         fps = int(cap.get(cv.CAP_PROP_FPS))
         num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
@@ -98,7 +97,8 @@ def find_optimal_confidences(video_path, face_crop_coords, duration=30, repeats=
             refine_landmarks=True,
             min_detection_confidence=optimal_detection_confidence,
             min_tracking_confidence=optimal_tracking_confidence
-        )                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+        )
+        
         for _ in range(duration_frames):
             ret, frame = cap.read()
             if not ret:
@@ -136,3 +136,5 @@ def find_optimal_confidences(video_path, face_crop_coords, duration=30, repeats=
 # optimal_detection_confidence, optimal_tracking_confidence = find_optimal_confidences(video_path, face_crop_coords, duration=20, repeats=3, showVideo=1)
 # print(f"Optimal Detection Confidence: {optimal_detection_confidence}")
 # print(f"Optimal Tracking Confidence: {optimal_tracking_confidence}")
+
+

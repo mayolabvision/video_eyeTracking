@@ -4,8 +4,8 @@ import numpy as np
 import os
 import random
 
-def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99, duration=10, repeats=10, output_path=None, showVideo=0):
-    """
+def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99, duration=10, repeats=10, output_path=None):
+    """ 
     This function crops the video based on face detection.
     
     Parameters:
@@ -14,7 +14,6 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
         duration (int): Duration of the video to process.
         repeats (int): Number of times to repeat the detection process.
         output_path (str or None): Path to save the output video. If None, the video is not saved.
-        showVideo (int): If set to 1, display the frames in real-time with face mesh points and bounding box.
     
     Returns:
         list: Bounding box coordinates [xmin, ymin, xmax, ymax].
@@ -61,8 +60,8 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
                         y2 = y1 + int(bboxC.height * h)
 
                         # Adjust coordinates to make the bounding box fit better
-                        padding_x = int(bboxC.width * w * 0.1)  # 10% padding on the width
-                        padding_y = int(bboxC.height * h * 0.1)  # 10% padding on the height
+                        padding_x = int(bboxC.width * w * 0.2)  # 20% padding on the width
+                        padding_y = int(bboxC.height * h * 0.2)  # 20% padding on the height                                                                                                                                                                                                                                                                                                                                                                                                                                      
                         x1 = max(0, x1 - padding_x)
                         y1 = max(0, y1 - padding_y)
                         x2 = min(w, x2 + padding_x)
@@ -74,64 +73,78 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
     cap.release()
     cv.destroyAllWindows()
 
-    if all_bboxes:
-        # Convert all bounding boxes to a numpy array
-        all_bboxes = np.array(all_bboxes)
+    if not all_bboxes:
+        raise ValueError("Could not detect a face in the video.")
 
-        # Calculate percentiles for each coordinate
-        percentiles = np.percentile(all_bboxes, [2.5, 97.5], axis=0)
+    # Convert all bounding boxes to a numpy array
+    all_bboxes = np.array(all_bboxes)
 
-        # Filter out bounding boxes that are outside the 95th percentile
-        filtered_bboxes = all_bboxes[
-            (all_bboxes[:, 0] >= percentiles[0, 0]) & (all_bboxes[:, 0] <= percentiles[1, 0]) &
-            (all_bboxes[:, 1] >= percentiles[0, 1]) & (all_bboxes[:, 1] <= percentiles[1, 1]) &
-            (all_bboxes[:, 2] >= percentiles[0, 2]) & (all_bboxes[:, 2] <= percentiles[1, 2]) &
-            (all_bboxes[:, 3] >= percentiles[0, 3]) & (all_bboxes[:, 3] <= percentiles[1, 3])
-        ]
+    # Calculate percentiles for each coordinate
+    percentiles = np.percentile(all_bboxes, [2.5, 97.5], axis=0)
 
-        # Calculate the mean of the filtered bounding boxes
-        final_bbox = np.mean(filtered_bboxes, axis=0)
-        final_bbox = [int(final_bbox[0]), int(final_bbox[1]), int(final_bbox[2]), int(final_bbox[3])]
+    # Filter out bounding boxes that are outside the 95th percentile
+    filtered_bboxes = all_bboxes[
+        (all_bboxes[:, 0] >= percentiles[0, 0]) & (all_bboxes[:, 0] <= percentiles[1, 0]) &
+        (all_bboxes[:, 1] >= percentiles[0, 1]) & (all_bboxes[:, 1] <= percentiles[1, 1]) &
+        (all_bboxes[:, 2] >= percentiles[0, 2]) & (all_bboxes[:, 2] <= percentiles[1, 2]) &
+        (all_bboxes[:, 3] >= percentiles[0, 3]) & (all_bboxes[:, 3] <= percentiles[1, 3])
+    ]
 
-        if showVideo == 1 or output_path:
-            # Select a random 10-second snippet
-            cap = cv.VideoCapture(video_path)
-            random_start_frame = random.randint(0, max(0, num_frames - duration_frames))
-            cap.set(cv.CAP_PROP_POS_FRAMES, random_start_frame)
+    # Calculate the min and max of the filtered bounding boxes
+    final_bbox = [
+        int(np.min(filtered_bboxes[:, 0])),  # min of x1
+        int(np.min(filtered_bboxes[:, 1])),  # min of y1
+        int(np.max(filtered_bboxes[:, 2])),  # max of x2
+        int(np.max(filtered_bboxes[:, 3]))   # max of y2
+    ]
 
-            # Define the codec and create a VideoWriter object if saving the video
-            if output_path:
-                fourcc = cv.VideoWriter_fourcc(*'XVID')
-                output_video_path = os.path.join(output_path, 'cropped_face_detection.avi')
-                out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
+    if output_path:
+        # Select a random 10-second snippet for cropped_face_detection.avi
+        cap = cv.VideoCapture(video_path)
+        random_start_frame = random.randint(0, max(0, num_frames - duration_frames))
+        cap.set(cv.CAP_PROP_POS_FRAMES, random_start_frame)
 
-            for _ in range(duration_frames):
-                ret, frame = cap.read()
-                if not ret:
-                    break
 
-                # Draw the final bounding box on the frame
-                cv.rectangle(frame, (final_bbox[0], final_bbox[1]), (final_bbox[2], final_bbox[3]), (0, 255, 0), 2)
-                
-                if output_path:
-                    out.write(frame)
+        # Define the codec and create VideoWriter objects if saving the videos
+        fourcc = cv.VideoWriter_fourcc(*'XVID')
+        output_video_path = os.path.join(output_path, 'cropped_face_detection.avi')
+        out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
 
-                # Display the frame with the bounding box if showVideo is set to 1
-                if showVideo == 1:
-                    cv.imshow('Final Crop', frame)
-                    cv.waitKey(1)  # Display each frame for 1 ms
+        full_video_path = os.path.join(output_path, 'cropped_fullVideo.avi')
+        out_full = cv.VideoWriter(full_video_path, fourcc, fps, (final_bbox[2] - final_bbox[0], final_bbox[3] - final_bbox[1]))
 
-            cap.release()
-            if output_path:
-                out.release()
-            cv.destroyAllWindows()
+        # Write the duration snippet for cropped_face_detection.avi
+        for _ in range(duration_frames):
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        return final_bbox
-    else:
-        return None
+            # Draw the final bounding box on the frame
+            cv.rectangle(frame, (final_bbox[0], final_bbox[1]), (final_bbox[2], final_bbox[3]), (0, 255, 0), 2)
+            out.write(frame)
+
+        cap.release()
+        out.release()
+
+        # Write the full video for cropped_fullVideo.mov
+        cap = cv.VideoCapture(video_path)
+        for _ in range(num_frames):
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Crop the frame based on the final bounding box
+            cropped_frame = frame[final_bbox[1]:final_bbox[3], final_bbox[0]:final_bbox[2]]
+            out_full.write(cropped_frame)
+
+        cap.release()
+        out_full.release()
+        cv.destroyAllWindows()
+
+    return
 
 # Example usage:
 # video_path = "path/to/your/video.avi"
 # output_path = make_output_directory(video_path)
-# cropped_coords = crop_video_based_on_face_detection(video_path, output_path=output_path, showVideo=1)
+# cropped_coords = crop_video_based_on_face_detection(video_path, output_path=output_path)
 # print(f"Cropped coordinates: {cropped_coords}")

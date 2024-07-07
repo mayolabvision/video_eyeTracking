@@ -1,5 +1,5 @@
 {
-    "data_path": "/Users/kendranoneman/OneDrive/ecog_data",
+    "data_path": "/Users/kendranoneman/Projects/mayo/video_eyeTracking/tests",
     "crop_video_based_on_face_detection": true,
-    "helpers_to_run": ["extract_video_info"]
+    "helpers_to_run": ["extract_video_info2"]
 }

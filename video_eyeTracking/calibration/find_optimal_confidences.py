@@ -52,7 +52,7 @@ def evaluate_confidences(video_path, detection_confidence, tracking_confidence, 
 
     return np.mean(detection_rates)
 
-def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_threshold=0.75, min_tracking_confidence=0.95, output_path=None):
+def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_threshold=0.75, min_tracking_confidence=0.95, goal_detection_rate=0.99, output_path=None):
     
     optimal_detection_confidence = None
     for dc in np.flip(np.arange(min_confidence_threshold, 1, 0.01)): # coarser param sweep
@@ -62,7 +62,7 @@ def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_
             for fine_dc in np.flip(np.arange(min_confidence_threshold, dc, 0.001)):
                 fine_detection_rate = evaluate_confidences(video_path, fine_dc, min_tracking_confidence, duration, repeats)
                 #print(f'fine_dc{fine_dc} = {fine_detection_rate}')
-                if fine_detection_rate >= 0.95:
+                if fine_detection_rate >= goal_detection_rate:
                     optimal_detection_confidence = round(fine_dc, 3)
                     break
             if optimal_detection_confidence is not None:
@@ -106,7 +106,6 @@ def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_
                         y = int(landmark.y * img_h)
                         cv.circle(frame, (x, y), 1, (255, 0, 0), -1)
 
-
                 height, width = frame.shape[:2]
                 cv.putText(frame, f'Detection Confidence: {optimal_detection_confidence:.3f}', (10, height - 40),
                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
@@ -120,9 +119,3 @@ def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_
         cv.destroyAllWindows()
 
     return round(optimal_detection_confidence, 3), round(min_tracking_confidence, 3)
-
-# Example usage:
-# video_path = "path/to/your/video.avi"
-# optimal_detection_confidence, optimal_tracking_confidence = find_optimal_confidences(video_path, duration=20, repeats=3, output_path='path/to/output')
-# print(f"Optimal Detection Confidence: {optimal_detection_confidence}")
-# print(f"Optimal Tracking Confidence: {optimal_tracking_confidence}")

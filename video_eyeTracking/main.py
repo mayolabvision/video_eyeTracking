@@ -3,8 +3,9 @@ import json
 import argparse
 import time
 import pickle
-from video_eyeTracking.calibration import crop_video_based_on_face_detection, find_optimal_confidences, calibrate_blink_threshold
+from video_eyeTracking.calibration import crop_video_based_on_face_detection, find_optimal_confidences
 from video_eyeTracking.utils import make_output_directory, extract_video_info, save_params_to_pickle, load_params_from_pickle
+from video_eyeTracking.tracking import extract_face_landmarks
 from video_eyeTracking.output import export_video
 
 def load_config(config_path=None):
@@ -40,6 +41,7 @@ def main():
         print("Loaded parameters from params.pickle")
     else:
         params = {}
+        params.update({"video_path": raw_video_path})
 
     # Extract video parameters if not already done
     print('------------ EXTRACTING PATIENT INFO ------------')
@@ -68,23 +70,19 @@ def main():
     print('------------ OPTIMIZING CONFIDENCE THRESHOLDS ------------')
     if "min_detection_confidence" not in params or "min_tracking_confidence" not in params:
         min_detection_confidence, min_tracking_confidence = find_optimal_confidences(video_path, output_path=output_path)
+        #min_detection_confidence, min_tracking_confidence = 0.90, 0.95
         params.update({
             "min_detection_confidence": min_detection_confidence,
             "min_tracking_confidence": min_tracking_confidence
         })
         print(f"Detection Confidence: {min_detection_confidence}, Tracking Confidence: {min_tracking_confidence}")
-
-    time.sleep(3)
-
-    # Calibrate blink threshold if not already done
-    print('------------ CALIBRATING BLINK THRESHOLD ------------')
-    if "blink_threshold" not in params:
-        blink_threshold = calibrate_blink_threshold(video_path, min_detection_confidence=params["min_detection_confidence"], min_tracking_confidence=params["min_tracking_confidence"], output_path=output_path)
-        params["blink_threshold"] = blink_threshold
-        print(f"Calculated blink threshold: {blink_threshold}")
-
-    # Save parameters to params.pickle
+    
     save_params_to_pickle(output_path, params)
+   
+###################################################################################################################################
+    print('------------ EXTRACTING FACE LANDMARKS ------------')
+    extract_face_landmarks(video_path, min_detection_confidence=params["min_detection_confidence"], min_tracking_confidence=params["min_tracking_confidence"], output_path=output_path)
+
 
 if __name__ == "__main__":
     main()

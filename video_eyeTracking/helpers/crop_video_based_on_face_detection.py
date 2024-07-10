@@ -18,6 +18,8 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
     Returns:
         list: Bounding box coordinates [xmin, ymin, xmax, ymax].
     """
+    print('------------ CROPPING VIDEO TO FACE ------------')
+    
     mp_face_detection = mp.solutions.face_detection
     mp_drawing = mp.solutions.drawing_utils
 
@@ -107,7 +109,7 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
 
         # Define the codec and create VideoWriter objects if saving the videos
         fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video_path = os.path.join(output_path, 'cropped_face_detection.avi')
+        output_video_path = os.path.join(output_path, 'STEP1_crop_video_to_face.avi')
         out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
 
         full_video_path = os.path.join(output_path, 'cropped_fullVideo.avi')
@@ -142,9 +144,3 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.99
         cv.destroyAllWindows()
 
     return
-
-# Example usage:
-# video_path = "path/to/your/video.avi"
-# output_path = make_output_directory(video_path)
-# cropped_coords = crop_video_based_on_face_detection(video_path, output_path=output_path)
-# print(f"Cropped coordinates: {cropped_coords}")

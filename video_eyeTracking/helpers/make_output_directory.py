@@ -23,8 +23,3 @@ def make_output_directory(video_path):
     os.makedirs(output_path, exist_ok=True)
     
     return output_path
-
-# Example usage:
-# video_path = "/Users/blah/video_haha.avi"
-# output_path = make_output_directory(video_path)
-# print(f"Output directory: {output_path}")

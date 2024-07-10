@@ -15,7 +15,8 @@ def evaluate_confidences(video_path, detection_confidence, tracking_confidence, 
 
     duration_frames = int(fps * duration)
     segments = max(1, repeats)  # Ensure there is at least one segment
-    possible_starts = [i * (num_frames - duration_frames) // (segments - 1) for i in range(segments)]
+    # Calculate possible start frames, excluding the first second
+    possible_starts = [fps + i * (num_frames - duration_frames - fps) // (segments - 1) for i in range(segments)]
 
     # Loop through each snippet of the video 
     detection_rates = []
@@ -52,21 +53,19 @@ def evaluate_confidences(video_path, detection_confidence, tracking_confidence, 
 
     return np.mean(detection_rates)
 
-def find_optimal_confidences(video_path, duration=30, repeats=5, min_confidence_threshold=0.75, min_tracking_confidence=0.95, goal_detection_rate=0.99, output_path=None):
+def find_optimal_confidences(video_path, duration=10, repeats=20, min_confidence_threshold=0.75, min_tracking_confidence=0.95, goal_detection_rate=0.95, output_path=None):
     
     optimal_detection_confidence = None
     for dc in np.flip(np.arange(min_confidence_threshold, 1, 0.01)): # coarser param sweep
         detection_rate = evaluate_confidences(video_path, dc, min_tracking_confidence, duration, repeats)
-        #print(f'dc{dc} = {detection_rate}')
-        if detection_rate >= 0.5: # start fine-tuning
-            for fine_dc in np.flip(np.arange(min_confidence_threshold, dc, 0.001)):
-                fine_detection_rate = evaluate_confidences(video_path, fine_dc, min_tracking_confidence, duration, repeats)
-                #print(f'fine_dc{fine_dc} = {fine_detection_rate}')
-                if fine_detection_rate >= goal_detection_rate:
+        print(f'dc {dc:.3f} = {detection_rate:.3f}')
+        if detection_rate >= (goal_detection_rate*0.75): # start fine-tuning
+            for fine_dc in np.flip(np.arange(min_confidence_threshold, dc-0.001, 0.001)): # coarser param sweep
+                detection_rate = evaluate_confidences(video_path, fine_dc, min_tracking_confidence, duration, repeats)
+                print(f'dc {fine_dc:.3f} = {detection_rate:.3f}')
+                if detection_rate >= goal_detection_rate:
                     optimal_detection_confidence = round(fine_dc, 3)
                     break
-            if optimal_detection_confidence is not None:
-                break
 
     if output_path:
         cap = cv.VideoCapture(video_path)

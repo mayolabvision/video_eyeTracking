@@ -3,10 +3,8 @@ import json
 import argparse
 import time
 import pickle
-from video_eyeTracking.calibration import crop_video_based_on_face_detection, find_optimal_confidences
-from video_eyeTracking.utils import make_output_directory, extract_video_info, save_params_to_pickle, load_params_from_pickle
+from video_eyeTracking.helpers import make_output_directory, extract_patient_info, crop_video_based_on_face_detection
 from video_eyeTracking.tracking import extract_face_landmarks
-from video_eyeTracking.output import export_video
 
 def load_config(config_path=None):
     if config_path is None:
@@ -20,6 +18,8 @@ def parse_arguments():
     parser.add_argument("video_relative_path", type=str, help="Relative path to the specific video file within the data directory.")
     parser.add_argument("--config", type=str, default=None, help="Path to an alternative config file.")
     parser.add_argument("--direct_video_path", type=str, default=None, help="Direct path to a video file, bypassing config data_path.")
+    parser.add_argument("--min_detection_confidence", type=float, default=None, help="Proportion of frames in which should detect a face.")
+    parser.add_argument("--min_tracking_confidence", type=float, default=None, help="Minimum tracking confidence value")
     return parser.parse_args()
 
 def main():
@@ -32,57 +32,39 @@ def main():
         data_path = config["data_path"]
         raw_video_path = os.path.join(data_path, args.video_relative_path)
     
-    output_path = make_output_directory(raw_video_path)
-
-    # Check if params.pickle exists and load it if it does
-    params_pickle_path = os.path.join(output_path, 'params.pickle')
-    if os.path.exists(params_pickle_path):
-        params = load_params_from_pickle(params_pickle_path)
-        print("Loaded parameters from params.pickle")
+###################################################################################################################################
+    #################### HELPER FUNCTIONS ####################
+    # Here is where you can put optional "helper" functions for your specific purpose
+    # I want to name my output data a particular way, so here is my code to do that
+    if "extract_patient_info" in config.get("helpers_to_run", []):
+        patient_id, seizure_num, video_num = extract_patient_info(args.video_relative_path)
+        print(f"Patient: {patient_id}, Seizure: {seizure_num}, Clip: {video_num}")
+        output_path = os.path.join(config["out_path"],f"{patient_id}_{seizure_num}_CLIP{video_num}")
+        if not os.path.exists(output_path):
+            os.makedirs(output_path, exist_ok=True)
+            print(f"Created output directory: {output_path}")
     else:
-        params = {}
-        params.update({"video_path": raw_video_path})
+        # Default is to make a sub-folder in the same path as input video
+        output_path = make_output_directory(raw_video_path)
 
-    # Extract video parameters if not already done
-    print('------------ EXTRACTING PATIENT INFO ------------')
-    if "extract_video_info" in config.get("helpers_to_run", []) and not all(k in params for k in ("patient_id", "seizure_num", "video_num")):
-        patient_id, seizure_num, video_num = extract_video_info(args.video_relative_path)
-        params.update({
-            "patient_id": patient_id,
-            "seizure_num": seizure_num,
-            "video_num": video_num
-        })
-        print(f"Patient ID: {patient_id}, Seizure Number: {seizure_num}, Video Number: {video_num}")
-
+    ############### Optional: CROPPING VIDEO TO FACE ###############
     # Crop video to face coordinates if not already done
-    print('------------ CROPPING VIDEO TO FACE ------------')
-    # Initialize face_crop_coords based on config and params
     if config.get("crop_video_based_on_face_detection", False):
-        if "face_crop_coords" not in params:
-            crop_video_based_on_face_detection(raw_video_path, output_path=output_path)
-            params["face_crop_coords"] = 1
-            print(f"Cropped video to face successfully.")
         video_path = os.path.join(output_path, 'cropped_fullVideo.avi')
+        if not os.path.exists(video_path):
+            crop_video_based_on_face_detection(raw_video_path, output_path=output_path)
+            print(f"Cropped video to face successfully.")
     else:
         video_path = raw_video_path 
-
-    # Optimize confidence thresholds if not already done
-    print('------------ OPTIMIZING CONFIDENCE THRESHOLDS ------------')
-    if "min_detection_confidence" not in params or "min_tracking_confidence" not in params:
-        min_detection_confidence, min_tracking_confidence = find_optimal_confidences(video_path, output_path=output_path)
-        #min_detection_confidence, min_tracking_confidence = 0.90, 0.95
-        params.update({
-            "min_detection_confidence": min_detection_confidence,
-            "min_tracking_confidence": min_tracking_confidence
-        })
-        print(f"Detection Confidence: {min_detection_confidence}, Tracking Confidence: {min_tracking_confidence}")
     
-    save_params_to_pickle(output_path, params)
-   
 ###################################################################################################################################
-    print('------------ EXTRACTING FACE LANDMARKS ------------')
-    extract_face_landmarks(video_path, min_detection_confidence=params["min_detection_confidence"], min_tracking_confidence=params["min_tracking_confidence"], output_path=output_path)
+    frame_width, frame_height = extract_face_landmarks(video_path, min_detection_confidence=params["min_detection_confidence"], min_tracking_confidence=params["min_tracking_confidence"], output_path=output_path)
+    params.update({
+        "frame_width": frame_width,
+        "frame_height": frame_height
+    })
 
+    save_params_to_pickle(output_path, params)
 
 if __name__ == "__main__":
     main()

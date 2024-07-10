@@ -1,6 +1,8 @@
 import re
+import os
 
-def extract_video_info(video_relative_path):
+def extract_patient_info(video_relative_path):
+    print('------------ EXTRACTING PATIENT INFO ------------')
     # Split the path and extract PATIENT_ID and SEIZURE_NUM
     parts = video_relative_path.split('/')
     patient_id = parts[0]
@@ -13,9 +15,4 @@ def extract_video_info(video_relative_path):
     else:
         video_num = None
     
-    return patient_id, seizure_num, video_num
-
-# Example usage:
-# video_path = "DF/SZ1/26d70c16-5ad8-4e4d-847c-be4cfc5b2ea1/26d70c16-5ad8-4e4d-847c-be4cfc5b2ea1_0002 (1).avi"
-# patient_id, seizure_num, video_num = extract_video_info(video_path)
-# print(patient_id, seizure_num, video_num)  # Outputs: DF SZ1 1
+    return patient_id, seizure_num, video_num 

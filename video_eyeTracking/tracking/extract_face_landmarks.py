@@ -4,6 +4,7 @@ from mediapipe.python.solutions.face_mesh_connections import *
 import numpy as np
 import os
 import csv
+import time
 
 ## Head Pose Estimation Landmark Indices
 # These indices correspond to the specific facial landmarks used for head pose estimation.
@@ -120,7 +121,8 @@ def normalize_pitch(pitch):
 
     return pitch
 
-def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracking_confidence=0.75, moving_average_window=1, logged_landmarks=None, output_path=None):
+def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracking_confidence=0.75, logged_landmarks=None, output_path=None):
+    print('------------ EXTRACTING FACE LANDMARKS ------------')
     drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=0.25)
     mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
         max_num_faces=1,
@@ -128,6 +130,7 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracki
         min_detection_confidence=min_detection_confidence,
         min_tracking_confidence=min_tracking_confidence)
 
+    time.sleep(1)
     cap = cv.VideoCapture(video_path)
     fps = int(cap.get(cv.CAP_PROP_FPS))
     num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
@@ -136,36 +139,38 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracki
 
     if output_path:
         fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video_path = os.path.join(output_path, 'face_landmarks.avi')
+        output_video_path = os.path.join(output_path, 'EYE_TRACKING.avi')
         out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
 
     csv_data = []
     # Column names for CSV file
     column_names = [
         "Frame Number",
-        "Time (ms)",
-        "Left Eye Center X",
-        "Left Eye Center Y",
-        "Right Eye Center X",
-        "Right Eye Center Y",
-        "Left Iris Relative Pos Dx",
-        "Left Iris Relative Pos Dy",
-        "Right Iris Relative Pos Dx",
-        "Right Iris Relative Pos Dy",
-        "Pitch",
-        "Yaw",
-        "Roll"
+        "Timestamp (ms)",
+        "Iris Center (Left,X)",
+        "Iris Center (Left,Y)",
+        "Iris Center (Right,X)",
+        "Iris Center (Right,Y)",
+        "Rel Iris Center (Left,dX)",
+        "Rel Iris Center (Left,dY)",
+        "Rel Iris Center (Right,dX)",
+        "Rel Iris Center (Right,dY)",
+        "Head Pose (Pitch)",
+        "Head Pose (Yaw)",
+        "Head Pose (Roll)"
     ]
 
     # Column names for CSV file
     if logged_landmarks:
         column_names.extend(
             [f"Landmark_{i}_X" for i in logged_landmarks]
-            + [f"Landmark_{i}_Y" for i in logged_landmarks])
+            + [f"Landmark_{i}_Y" for i in logged_landmarks]
+            + [f"Landmark_{i}_Z" for i in logged_landmarks])
     else:
         column_names.extend(
         [f"Landmark_{i}_X" for i in range(478)]
-        + [f"Landmark_{i}_Y" for i in range(478)])
+        + [f"Landmark_{i}_Y" for i in range(478)]
+        + [f"Landmark_{i}_Z" for i in range(478)])
 
     initial_pitch, initial_yaw, initial_roll = None, None, None 
     for thisFrame in range(num_frames):
@@ -291,16 +296,16 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracki
             log_entry = [(thisFrame+1),timestamp,l_cx,l_cy,r_cx,r_cy,l_dx,l_dy,r_dx,r_dy]
             log_entry.extend([pitch, yaw, roll])
             if logged_landmarks:
-                log_entry.extend([p for point in mesh_points[logged_landmarks] for p in point])
+                log_entry.extend([p for point in mesh_points_3D[logged_landmarks] for p in point])
             else:
-                log_entry.extend([p for point in mesh_points for p in point])
+                log_entry.extend([p for point in mesh_points_3D for p in point])
             
             csv_data.append(log_entry)
         
         if output_path:
             out.write(frame)
 
-        cv.imshow('MediaPipe Face Mesh', cv.flip(frame, 1))
+        cv.imshow('MediaPipe Face Mesh', frame)
         if cv.waitKey(5) & 0xFF == 27:
             break
         
@@ -312,13 +317,12 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.75, min_tracki
     # Writing data to CSV file
     print("Writing data to CSV...")
     csv_file_name = os.path.join(
-        output_path, f"eye_landmarks_log.csv"
+        output_path, f"EYE_LANDMARKS_LOGS.csv"
     )
     with open(csv_file_name, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(column_names)  # Writing column names
         writer.writerows(csv_data)  # Writing data rows
 
-# Example usage:
-# video_path = "path/to/your/video.avi"
-# detect_blinks(video_path, output_path='path/to/output')
+    return img_w, img_h
+

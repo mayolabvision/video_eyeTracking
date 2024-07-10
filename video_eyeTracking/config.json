@@ -1,5 +1,6 @@
 {
-    "data_path": "/Users/kendranoneman/Projects/mayo/video_eyeTracking/tests",
+    "data_path": "/Users/kendranoneman/OneDrive/EyeMovement",
+    "out_path": "/Users/kendranoneman/OneDrive/EyeMovement_wTracking/deidentified_DATA",
     "crop_video_based_on_face_detection": true,
-    "helpers_to_run": ["extract_video_info2"]
+    "helpers_to_run": ["extract_patient_info"]
 }

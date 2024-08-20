@@ -22,7 +22,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -227,8 +226,6 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 [stars-url]: https://github.com/mayolabvision/video_eyeTracking/stargazers
 [issues-shield]: https://img.shields.io/github/issues/mayolabvision/video_eyeTracking.svg?style=for-the-badge
 [issues-url]: https://github.com/mayolabvision/video_eyeTracking/issues
-[license-shield]: https://img.shields.io/github/license/mayolabvision/video_eyeTracking.svg?style=for-the-badge
-[license-url]: https://github.com/mayolabvision/video_eyeTracking/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/mayolabvision
 [product-screenshot]: images/screenshot.png

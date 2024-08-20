@@ -128,17 +128,6 @@ brew install wget
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-
-
-https://github.com/user-attachments/assets/e63b9e4b-6b80-4fc9-9462-c05c99599343
-
-
-
-
 https://github.com/user-attachments/assets/c57a8ac7-6bcc-4a56-b231-f53c57c04c48
 
 

@@ -1,56 +1,28 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-
+[![bg][banner]][website]
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/mayolabvision/video_eyeTracking">
+    <img src="images/logo.png" alt="Logo" width="420" height="400">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">Offline Gaze Tracking from Video: Analyzing Eye Movements and Head Pose</h3>
 
   <p align="center">
-    project_description
+    This project focuses on offline gaze tracking from video data, where the input is a video of a subject’s face. The code processes the video to analyze eye movements and head pose, generating output videos that visually demonstrate each processing step. Additionally, two CSV files are produced: one containing the pixel coordinates of facial landmarks for each frame, and another with the calculated gaze and head pose vectors. In this version, the gaze vectors are in pixel units because the necessary calibration information—such as camera focal length, subject distance, and face width—is not available, preventing the calculation of gaze in degrees of visual angle.
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -77,34 +49,41 @@
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
-
-
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 ### Built With
 
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+* [![Python][Python.com]][Python-url]
+* [![MediaPipe][MediaPipe.com]][MediaPipe-url]
+* [![OpenCV][OpenCV.com]][OpenCV-url]
+
+There are numerous repositories available that track gaze in real-time using webcams, but I needed a solution that could perform this analysis on multiple videos offline. This repository is designed to analyze pre-recorded videos by determining where the face of the subject is located, cropping the video to focus solely on that face, and then extracting the facial landmarks from each frame. These landmarks are saved in a file called FACE_LANDMARKS_LOGS.csv and are crucial for estimating gaze direction.
+
+The repository calculates the absolute and relative gaze for each eye, the head pose, Point of Gaze (PoG), and vergence based on the relevant facial landmarks. Since we do not have access to the camera’s focal length, the width of the subject’s head, or the distance between the camera and the subject, all calculations are done in units of pixels.
+
+The output file EYE_GAZE_LOGS.csv includes the following columns:
+* *Frame Number:* The index of the frame within the video, used to track the frame order.
+* *Time Aligned to Video Start (ms):* The timestamp of each frame in milliseconds, aligned to the start of the video. This helps in synchronizing gaze data with the video timeline.
+* *Absolute Gaze (right, x):* The x-coordinate of the right eye’s gaze direction in pixels. This value represents where the right eye is looking on the screen. If the value is 0, the gaze is directed towards the center of the frame; positive values indicate a gaze directed to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject is looking “out of frame".
+* *Absolute Gaze (right, y):* The y-coordinate of the right eye’s gaze direction in pixels. If the value is 0, the gaze is directed towards the center of the frame; positive values indicate a gaze directed to the upwards of center, negative values downwards, and if the |value| is greater than half the frame width, the subject is looking “out of frame".
+* *Absolute Gaze (left, x):* The x-coordinate of the left eye’s gaze direction in pixels. See above.
+* *Absolute Gaze (left, y):* The y-coordinate of the left eye’s gaze direction in pixels. See above.
+* *Point of Gaze (x):* The x-coordinate of the average absolute gaze direction between the two eyes, in pixels. 
+* *Point of Gaze (y):* The y-coordinate of the average absolute gaze direction between the two eyes, in pixels. 
+* *Vergence Distance:* The distance between the gaze directions of the left and right eyes, indicating depth perception. A smaller distance indicates that the eyes are converging, suggesting that the subject is focusing on a closer object. A larger distance indicates a more parallel gaze, suggesting that the subject is focusing on a farther object.
+* *Head Pose (x):* The x-coordinate of the head’s orientation in pixels, representing the horizontal position of the nose or face center. If the value is 0, the head is oriented towards the center of the frame; positive values indicate the head is oriented to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject's head is oriented “out of frame".
+* *Head Pose (y):* The y-coordinate of the head’s orientation in pixels, representing the horizontal position of the nose or face center. If the value is 0, the head is oriented towards the center of the frame; positive values indicate the head is oriented to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject's head is oriented “out of frame".
+* *Relative Gaze (right, x):* The difference between the right eye’s absolute gaze and the head pose in pixels, representing how far the right eye’s gaze direction deviates from the head’s orientation on the horizontal axis. A positive value indicates that the gaze is directed to the right relative to the head, and a negative value indicates a leftward direction.
+* *Relative Gaze (right, y):* The difference between the right eye’s absolute gaze and the head pose in pixels, representing how far the right eye’s gaze direction deviates from the head’s orientation on the vertical axis. A positive value indicates that the gaze is directed downward relative to the head, and a negative value indicates an upward direction.
+* *Relative Gaze (left, x):* The difference between the left eye’s absolute gaze and the head pose, in pixels. See above.
+* *Relative Gaze (left, y):* The y-coordinate difference between the left eye’s absolute gaze and the head pose, in pixels. See above.
+
+At the end of the process, a video called SUMMARY_VID.avi is generated. This video shows the subject with the estimated absolute gaze position for each eye and head pose represented as vectors (in the left subpanel), and these values are plotted on Cartesian axes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -122,24 +101,25 @@ This is an example of how to list things you need to use the software and how to
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+1. Make a new Python environment with set version and additional packages
+```buildoutcfg
+conda create -n "eyedetect" python=3.11.4 ffmpeg tqdm dlib
+```
+Activate new environment called "eyedetect"
+```buildoutcfg
+conda activate eyedetect
+```
+
+2. Install a couple other packages with pip
+```buildoutcfg
+pip install opencv-python
+```
+```buildoutcfg
+pip install --upgrade mediapipe
+```
+```buildoutcfg
+brew install wget
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -148,12 +128,12 @@ This is an example of how to list things you need to use the software and how to
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+https://github.com/user-attachments/assets/c57a8ac7-6bcc-4a56-b231-f53c57c04c48
 
-_For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+![mediapipe_face_landmark_fullsize](https://github.com/user-attachments/assets/4726dee0-295c-445a-b5f4-324ddb526a23)
 
 
 <!-- ROADMAP -->
@@ -164,7 +144,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Feature 3
     - [ ] Nested Feature
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/mayolabvision/video_eyeTracking/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -188,11 +168,9 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/github_username/repo_name/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
+<a href="https://github.com/mayolabvision/video_eyeTracking/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mayolabvision/video_eyeTracking" alt="contrib.rocks image" />
 </a>
-
-
 
 <!-- LICENSE -->
 ## License
@@ -206,9 +184,9 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Your Name - [@kendranoneman](https://twitter.com/kendranoneman) - knoneman@andrew.cmu.edu
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://github.com/mayolabivision/video_eyeTracking)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -217,109 +195,30 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
-* []()
+https://link.springer.com/chapter/10.1007/978-3-030-82681-9_4
+https://dl.acm.org/doi/pdf/10.1145/2578153.2578185
+
+* [Python-Gaze-Face-Tracker (alireza787b)](https://github.com/alireza787b/Python-Gaze-Face-Tracker)
+* [iris-Segmentation-mediapipe-python (Asadullah-Dal17)](https://github.com/Asadullah-Dal17/iris-Segmentation-mediapipe-python)
+* [Gaze_estimation (amitt1236)](https://github.com/amitt1236/Gaze_estimation?source=post_page-----570d4683fe23--------------------------------)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[contributors-url]: https://github.com/mayolabvision/video_eyeTracking/graphs/contributors
+[issues-shield]: https://img.shields.io/github/issues/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[issues-url]: https://github.com/mayolabvision/video_eyeTracking/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
-
-# video_eyeTracking_ECoG
-
-1. Make a new Python environment with set version and additional packages
-```buildoutcfg
-conda create -n "eyedetect" python=3.11.4 ffmpeg tqdm dlib
-```
-Activate new environment called "eyedetect"
-```buildoutcfg
-conda activate eyedetect
-```
-
-2. Install a couple other packages with pip
-```buildoutcfg
-pip install opencv-python
-```
-```buildoutcfg
-pip install --upgrade mediapipe
-```
-```buildoutcfg
-brew install wget
-```
-
-
-## CSV Column Descriptions
-
-The CSV files generated by the gaze-tracking script include several columns that capture both the raw eye gaze directions and the gaze directions adjusted for head position. Below is a description of each column to help you understand the data:
-
-1. **Frame Number**
-   - **Description**: The index of the frame in the video, starting from 1.
-   - **Units**: None (integer).
-
-2. **Timestamp (ms)**
-   - **Description**: The timestamp corresponding to each frame, measured in milliseconds from the start of the video.
-   - **Units**: Milliseconds.
-
-3. **Head-Adjusted Left Eye Gaze X (degrees)**
-   - **Description**: The horizontal direction of the left eye's gaze, adjusted for the head's yaw (horizontal rotation). This provides a more accurate representation of where the left eye is looking in the environment.
-   - **Units**: Degrees.
-
-4. **Head-Adjusted Left Eye Gaze Y (degrees)**
-   - **Description**: The vertical direction of the left eye's gaze, adjusted for the head's pitch (vertical tilt). This provides a more accurate representation of where the left eye is looking in the environment.
-   - **Units**: Degrees.
-
-5. **Head-Adjusted Right Eye Gaze X (degrees)**
-   - **Description**: The horizontal direction of the right eye's gaze, adjusted for the head's yaw (horizontal rotation). This provides a more accurate representation of where the right eye is looking in the environment.
-   - **Units**: Degrees.
-
-6. **Head-Adjusted Right Eye Gaze Y (degrees)**
-   - **Description**: The vertical direction of the right eye's gaze, adjusted for the head's pitch (vertical tilt). This provides a more accurate representation of where the right eye is looking in the environment.
-   - **Units**: Degrees.
-
-7. **Raw Left Eye Gaze X (pixels)**
-   - **Description**: The horizontal direction of the left eye's gaze in pixel space, measured relative to the outer corner of the left eye. This does not account for the head's position.
-   - **Units**: Pixels.
-
-8. **Raw Left Eye Gaze Y (pixels)**
-   - **Description**: The vertical direction of the left eye's gaze in pixel space, measured relative to the outer corner of the left eye. This does not account for the head's position.
-   - **Units**: Pixels.
-
-9. **Raw Right Eye Gaze X (pixels)**
-   - **Description**: The horizontal direction of the right eye's gaze in pixel space, measured relative to the outer corner of the right eye. This does not account for the head's position.
-   - **Units**: Pixels.
-
-10. **Raw Right Eye Gaze Y (pixels)**
-    - **Description**: The vertical direction of the right eye's gaze in pixel space, measured relative to the outer corner of the right eye. This does not account for the head's position.
-    - **Units**: Pixels.
+[linkedin-url]: https://linkedin.com/in/mayolabvision
+[banner]: https://github.com/mayolabvision/.github/blob/main/mayolab-logo.png
+[website]: https://www.mayolab.net/research
+[twitter]: https://twitter.com/mayo_lab
+[Python.com]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org
+[MediaPipe.com]: https://img.shields.io/badge/MediaPipe-00C853?style=for-the-badge&logo=mediapipe&logoColor=white
+[MediaPipe-url]: https://mediapipe.dev
+[OpenCV.com]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white
+[OpenCV-url]: https://opencv.org

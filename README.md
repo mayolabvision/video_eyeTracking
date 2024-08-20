@@ -222,7 +222,7 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/mayolabivision/video_eyeTracking.svg?style=for-the-badge
-[contributors-url]: https://github.com/mayolabivision/video_eyeTracking/graphs/contributors
+[contributors-url]: https://github.com/mayolabvision/video_eyeTracking/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/mayolabvision/video_eyeTracking.svg?style=for-the-badge
 [forks-url]: https://github.com/mayolabvision/video_eyeTracking/network/members
 [stars-shield]: https://img.shields.io/github/stars/mayolabvision/video_eyeTracking.svg?style=for-the-badge

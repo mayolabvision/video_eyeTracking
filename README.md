@@ -34,7 +34,7 @@
     <img src="images/logo.png" alt="Logo" width="420" height="400">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">Offline Gaze Tracking from Video: Analyzing Eye Movements and Head Pose</h3>
 
   <p align="center">
     project_description

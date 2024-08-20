@@ -206,7 +206,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - knoneman@andrew.cmu.edu
+Your Name - [@kendranoneman](https://twitter.com/kendranoneman) - knoneman@andrew.cmu.edu
 
 Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
 

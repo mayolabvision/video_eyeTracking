@@ -1,7 +1,7 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<!-- Improved compatibility of back to top link: See: https://github.com/mayolabvision/video_eyeTracking/pull/73 -->
 <a id="readme-top"></a>
 <!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** Thanks for checking out the video_eyeTracking. If you have a suggestion
 *** that would make this better, please fork the repo and create a pull request
 *** or simply open an issue with the tag "enhancement".
 *** Don't forget to give the project a star!
@@ -230,7 +230,7 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 [license-shield]: https://img.shields.io/github/license/mayolabvision/video_eyeTracking.svg?style=for-the-badge
 [license-url]: https://github.com/mayolabvision/video_eyeTracking/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/kendranoneman
+[linkedin-url]: https://linkedin.com/in/mayolabvision
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/

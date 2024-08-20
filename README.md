@@ -30,7 +30,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/mayolabvision/video_eyeTracking">
     <img src="images/logo.png" alt="Logo" width="420" height="400">
   </a>
 
@@ -39,14 +39,14 @@
   <p align="center">
     This project focuses on offline gaze tracking from video data, where the input is a video of a subject’s face. The code processes the video to analyze eye movements and head pose, generating output videos that visually demonstrate each processing step. Additionally, two CSV files are produced: one containing the pixel coordinates of facial landmarks for each frame, and another with the calculated gaze and head pose vectors. In this version, the gaze vectors are in pixel units because the necessary calibration information—such as camera focal length, subject distance, and face width—is not available, preventing the calculation of gaze in degrees of visual angle.
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/mayolabvision/video_eyeTracking/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -85,7 +85,7 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `linkedin_username`
+Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -125,7 +125,7 @@ This is an example of how to list things you need to use the software and how to
 1. Get a free API Key at [https://example.com](https://example.com)
 2. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/mayolabvision/video_eyeTracking.git
    ```
 3. Install NPM packages
    ```sh
@@ -137,7 +137,7 @@ This is an example of how to list things you need to use the software and how to
    ```
 5. Change git remote url to avoid accidental pushes to base project
    ```sh
-   git remote set-url origin github_username/repo_name
+   git remote set-url origin mayolabvision/video_eyeTracking
    git remote -v # confirm the changes
    ```
 
@@ -164,7 +164,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Feature 3
     - [ ] Nested Feature
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/mayolabvision/video_eyeTracking/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -188,8 +188,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/github_username/repo_name/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
+<a href="https://github.com/mayolabvision/video_eyeTracking/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mayolabvision/video_eyeTracking" alt="contrib.rocks image" />
 </a>
 
 
@@ -208,7 +208,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Your Name - [@kendranoneman](https://twitter.com/kendranoneman) - knoneman@andrew.cmu.edu
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://github.com/mayolabivision/video_eyeTracking)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -227,16 +227,16 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/mayolabivision/video_eyeTracking.svg?style=for-the-badge
+[contributors-url]: https://github.com/mayolabivision/video_eyeTracking/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[forks-url]: https://github.com/mayolabvision/video_eyeTracking/network/members
+[stars-shield]: https://img.shields.io/github/stars/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[stars-url]: https://github.com/mayolabvision/video_eyeTracking/stargazers
+[issues-shield]: https://img.shields.io/github/issues/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[issues-url]: https://github.com/mayolabvision/video_eyeTracking/issues
+[license-shield]: https://img.shields.io/github/license/mayolabvision/video_eyeTracking.svg?style=for-the-badge
+[license-url]: https://github.com/mayolabvision/video_eyeTracking/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/kendranoneman
 [product-screenshot]: images/screenshot.png

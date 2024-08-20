@@ -1,6 +1,6 @@
 {
     "data_path": "/Users/kendranoneman/Projects/mayo/video_eyeTracking/tests",
     "out_path": "/Users/kendranoneman/Projects/mayo/video_eyeTracking/tests",
-    "crop_video_based_on_face_detection": false,
+    "crop_video_based_on_face_detection": true,
     "helpers_to_run": ["extract_patient_info2"]
 }

@@ -78,7 +78,7 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
             ax.clear()
             ax.set_aspect(aspect='auto')
             ax.set_xlim(x_min-1, x_max+1)
-            ax.set_ylim(x_min-1, y_max+1)
+            ax.set_ylim(y_min-1, y_max+1)
             ax.set_xlabel('Horizontal Position (pix)')
             ax.set_ylabel('Vertical Position (pix)')
 
@@ -128,7 +128,7 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
                 text_head_pose = []
 
             ax.set_xlim(x_min-1, x_max+1)
-            ax.set_ylim(x_min-1, y_max+1)
+            ax.set_ylim(y_min-1, y_max+1)
             ax.axhline(0, color='lightgray', linestyle='--')
             ax.axvline(0, color='lightgray', linestyle='--')
             ax.set_xlabel('Horizontal Position (pix)')

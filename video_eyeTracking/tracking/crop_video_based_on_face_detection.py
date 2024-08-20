@@ -118,7 +118,7 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
 
             cv.rectangle(frame, (final_bbox[0], final_bbox[1]), (final_bbox[2], final_bbox[3]), (0, 255, 0), 2)
             out.write(frame)
-            cv.imshow(frame)
+            cv.imshow('Cropped Frame',frame)
             cv.waitKey(1)
 
         cv.waitKey(1)

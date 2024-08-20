@@ -65,23 +65,23 @@ There are numerous repositories available that track gaze in real-time using web
 The repository calculates the absolute and relative gaze for each eye, the head pose, Point of Gaze (PoG), and vergence based on the relevant facial landmarks. Since we do not have access to the camera’s focal length, the width of the subject’s head, or the distance between the camera and the subject, all calculations are done in units of pixels.
 
 The output file EYE_GAZE_LOGS.csv includes the following columns:
-* Frame Number: The index of the frame within the video.
-* Time Aligned to Video Start (ms): The timestamp of the frame in milliseconds, aligned to the start of the video.
-* Absolute Gaze (right, x): The x-coordinate of the right eye’s gaze direction in pixels.
-* Absolute Gaze (right, y): The y-coordinate of the right eye’s gaze direction in pixels.
-* Absolute Gaze (left, x): The x-coordinate of the left eye’s gaze direction in pixels.
-* Absolute Gaze (left, y): The y-coordinate of the left eye’s gaze direction in pixels.
-* Point of Gaze (x): The x-coordinate of the average gaze direction (PoG) in pixels.
-* Point of Gaze (y): The y-coordinate of the average gaze direction (PoG) in pixels.
-* Vergence Distance: The distance between the gaze directions of the left and right eyes, indicating depth perception.
-* Head Pose (x): The x-coordinate of the head’s orientation in pixels.
-* Head Pose (y): The y-coordinate of the head’s orientation in pixels.
-* Relative Gaze (right, x): The difference between the right eye’s absolute gaze and the head pose, in pixels.
-* Relative Gaze (right, y): The y-coordinate difference between the right eye’s absolute gaze and the head pose, in pixels.
-* Relative Gaze (left, x): The difference between the left eye’s absolute gaze and the head pose, in pixels.
-* Relative Gaze (left, y): The y-coordinate difference between the left eye’s absolute gaze and the head pose, in pixels.
+* *Frame Number:* The index of the frame within the video, used to track the frame order.
+* *Time Aligned to Video Start (ms):* The timestamp of each frame in milliseconds, aligned to the start of the video. This helps in synchronizing gaze data with the video timeline.
+* *Absolute Gaze (right, x):* The x-coordinate of the right eye’s gaze direction in pixels. This value represents where the right eye is looking on the screen. If the value is 0, the gaze is directed towards the center of the frame; positive values indicate a gaze directed to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject is looking “out of frame".
+* *Absolute Gaze (right, y):* The y-coordinate of the right eye’s gaze direction in pixels. If the value is 0, the gaze is directed towards the center of the frame; positive values indicate a gaze directed to the upwards of center, negative values downwards, and if the |value| is greater than half the frame width, the subject is looking “out of frame".
+* *Absolute Gaze (left, x):* The x-coordinate of the left eye’s gaze direction in pixels. See above.
+* *Absolute Gaze (left, y):* The y-coordinate of the left eye’s gaze direction in pixels. See above.
+* *Point of Gaze (x):* The x-coordinate of the average absolute gaze direction between the two eyes, in pixels. 
+* *Point of Gaze (y):* The y-coordinate of the average absolute gaze direction between the two eyes, in pixels. 
+* *Vergence Distance:* The distance between the gaze directions of the left and right eyes, indicating depth perception. A smaller distance indicates that the eyes are converging, suggesting that the subject is focusing on a closer object. A larger distance indicates a more parallel gaze, suggesting that the subject is focusing on a farther object.
+* *Head Pose (x):* The x-coordinate of the head’s orientation in pixels, representing the horizontal position of the nose or face center. If the value is 0, the head is oriented towards the center of the frame; positive values indicate the head is oriented to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject's head is oriented “out of frame".
+* *Head Pose (y):* The y-coordinate of the head’s orientation in pixels, representing the horizontal position of the nose or face center. If the value is 0, the head is oriented towards the center of the frame; positive values indicate the head is oriented to the right of center, negative values to the left, and if the |value| is greater than half the frame width, the subject's head is oriented “out of frame".
+* *Relative Gaze (right, x):* The difference between the right eye’s absolute gaze and the head pose in pixels, representing how far the right eye’s gaze direction deviates from the head’s orientation on the horizontal axis. A positive value indicates that the gaze is directed to the right relative to the head, and a negative value indicates a leftward direction.
+* *Relative Gaze (right, y):* The difference between the right eye’s absolute gaze and the head pose in pixels, representing how far the right eye’s gaze direction deviates from the head’s orientation on the vertical axis. A positive value indicates that the gaze is directed downward relative to the head, and a negative value indicates an upward direction.
+* *Relative Gaze (left, x):* The difference between the left eye’s absolute gaze and the head pose, in pixels. See above.
+* *Relative Gaze (left, y):* The y-coordinate difference between the left eye’s absolute gaze and the head pose, in pixels. See above.
 
-At the end of the process, a video called SUMMARY_VID.avi is generated. This video shows the subject with the estimated absolute gaze position for each eye and head pose represented as vectors (in the left subpanel), and these values are plotted on Cartesian axes. In the plot, the point [0,0] corresponds to the subject directing their eyes and/or head toward the center of the camera frame.
+At the end of the process, a video called SUMMARY_VID.avi is generated. This video shows the subject with the estimated absolute gaze position for each eye and head pose represented as vectors (in the left subpanel), and these values are plotted on Cartesian axes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

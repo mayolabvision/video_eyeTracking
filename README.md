@@ -196,8 +196,8 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 ## Acknowledgments
 
 * [Python-Gaze-Face-Tracker (alireza787b)](https://github.com/alireza787b/Python-Gaze-Face-Tracker)
-* []()
-* []()
+* [iris-Segmentation-mediapipe-python (Asadullah-Dal17)](https://github.com/Asadullah-Dal17/iris-Segmentation-mediapipe-python)
+* [Gaze_estimation (amitt1236)](https://github.com/amitt1236/Gaze_estimation?source=post_page-----570d4683fe23--------------------------------)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

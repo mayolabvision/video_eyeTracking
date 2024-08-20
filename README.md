@@ -18,6 +18,7 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
+[![Lab Website][🏡]][website]
 [![Contributors][contributors-shield]][contributors-url]
 [![Issues][issues-shield]][issues-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
@@ -25,7 +26,6 @@
 
 [![bg][banner]][website]
 
-🏡 [lab website][website] **|** 
 🐦 [twitter][twitter] **|** 
 
 <!-- PROJECT LOGO -->
@@ -222,15 +222,10 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/mayolabvision/video_eyeTracking.svg?style=for-the-badge
 [contributors-url]: https://github.com/mayolabvision/video_eyeTracking/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/mayolabvision/video_eyeTracking.svg?style=for-the-badge
-[forks-url]: https://github.com/mayolabvision/video_eyeTracking/network/members
-[stars-shield]: https://img.shields.io/github/stars/mayolabvision/video_eyeTracking.svg?style=for-the-badge
-[stars-url]: https://github.com/mayolabvision/video_eyeTracking/stargazers
 [issues-shield]: https://img.shields.io/github/issues/mayolabvision/video_eyeTracking.svg?style=for-the-badge
 [issues-url]: https://github.com/mayolabvision/video_eyeTracking/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/mayolabvision
-[product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB

@@ -49,16 +49,15 @@
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- ABOUT THE PROJECT -->
 ### Built With
 
 * [![Python][Python.com]][Python-url]
 * [![MediaPipe][MediaPipe.com]][MediaPipe-url]
 * [![OpenCV][OpenCV.com]][OpenCV-url]
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 There are numerous repositories available that track gaze in real-time using webcams, but I needed a solution that could perform this analysis on multiple videos offline. This repository is designed to analyze pre-recorded videos by determining where the face of the subject is located, cropping the video to focus solely on that face, and then extracting the facial landmarks from each frame. These landmarks are saved in a file called FACE_LANDMARKS_LOGS.csv and are crucial for estimating gaze direction.
 

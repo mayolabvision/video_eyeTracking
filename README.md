@@ -133,6 +133,7 @@ https://github.com/user-attachments/assets/c57a8ac7-6bcc-4a56-b231-f53c57c04c48
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+![mediapipe_face_landmark_fullsize](https://github.com/user-attachments/assets/4726dee0-295c-445a-b5f4-324ddb526a23)
 
 
 <!-- ROADMAP -->
@@ -193,6 +194,9 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
+
+https://link.springer.com/chapter/10.1007/978-3-030-82681-9_4
+https://dl.acm.org/doi/pdf/10.1145/2578153.2578185
 
 * [Python-Gaze-Face-Tracker (alireza787b)](https://github.com/alireza787b/Python-Gaze-Face-Tracker)
 * [iris-Segmentation-mediapipe-python (Asadullah-Dal17)](https://github.com/Asadullah-Dal17/iris-Segmentation-mediapipe-python)

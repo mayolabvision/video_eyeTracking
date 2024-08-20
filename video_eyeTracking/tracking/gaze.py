@@ -1,12 +1,15 @@
-import cv2
+import cv2 as cv
 import numpy as np
 
 relative = lambda landmark, shape: (int(landmark.x * shape[1]), int(landmark.y * shape[0]))
 relativeT = lambda landmark, shape: (int(landmark.x * shape[1]), int(landmark.y * shape[0]), 0)
 
-def normalize_to_range(value, min_val, max_val, new_min, new_max):
-    """Normalize a value to a new range."""
-    return new_min + (value - min_val) * (new_max - new_min) / (max_val - min_val)
+def normalize_vector(vec):
+    """Normalize a vector to unit length."""
+    norm = np.linalg.norm(vec)
+    if norm == 0: 
+       return vec
+    return vec / norm
 
 def gaze(frame, points):
     """ 
@@ -49,6 +52,7 @@ def gaze(frame, points):
     Eye_ball_center_left = np.array([[29.05], [32.7], [-39.5]])  # the center of the left eyeball as a vector.
 
     # Camera matrix estimation
+    frame_center = np.array([frame.shape[1] / 2, frame.shape[0] / 2])
     focal_length = frame.shape[1]
     center = (frame.shape[1] / 2, frame.shape[0] / 2)
     camera_matrix = np.array(
@@ -58,74 +62,95 @@ def gaze(frame, points):
     )   
 
     dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
-    (success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, image_points, camera_matrix,
-                                                                  dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
+    (success, rotation_vector, translation_vector) = cv.solvePnP(model_points, image_points, camera_matrix,
+                                                                  dist_coeffs, flags=cv.SOLVEPNP_ITERATIVE)
 
     # 2D pupil locations for both eyes
     left_pupil = relative(points.landmark[468], frame.shape)
     right_pupil = relative(points.landmark[473], frame.shape)
-
+    nose_tip = relative(points.landmark[4], frame.shape)
+    
     # Transformation between image point to world point
-    _, transformation, _ = cv2.estimateAffine3D(image_points1, model_points)  # image to world transformation
+    _, transformation, _ = cv.estimateAffine3D(image_points1, model_points)  # image to world transformation
 
     if transformation is not None:  # if estimateAffine3D succeeded
-        def calculate_gaze(pupil, Eye_ball_center):
-            # Project pupil image point into 3D world point
+        def calculate_gaze(pupil, Eye_ball_center, nose_tip):
+            # Project pupil image point into 3D world coordinates
             pupil_world_cord = transformation @ np.array([[pupil[0], pupil[1], 0, 1]]).T
 
-            # 3D gaze point (10 is an arbitrary value denoting gaze distance)
-            S = Eye_ball_center + (pupil_world_cord - Eye_ball_center) * 10
+            # 3D gaze point based on direction vector
+            gaze_direction_3D = (pupil_world_cord - Eye_ball_center)
 
-            # Project a 3D gaze direction onto the image plane.
-            eye_pupil2D, _ = cv2.projectPoints((int(S[0]), int(S[1]), int(S[2])), rotation_vector,
-                                               translation_vector, camera_matrix, dist_coeffs)
+            # Normalize the gaze direction vector
+            normalized_gaze_direction = normalize_vector(gaze_direction_3D)
+
+            # Project the normalized 3D gaze direction onto the image plane
+            S = Eye_ball_center + normalized_gaze_direction * 200  # Scale to a consistent length
+            eye_pupil2D, _ = cv.projectPoints(S.T, rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
             # Project 3D head pose into the image plane
-            head_pose, _ = cv2.projectPoints((int(pupil_world_cord[0]), int(pupil_world_cord[1]), int(40)),
-                                             rotation_vector, translation_vector, camera_matrix, dist_coeffs)
+            head_pose, _ = cv.projectPoints((pupil_world_cord.T[:, :3]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
-            # Correct gaze for head rotation
-            gaze = pupil + (eye_pupil2D[0][0] - pupil) - (head_pose[0][0] - pupil)
+            # Calculate the gaze direction vector starting from the nose tip
+            gaze = nose_tip + (eye_pupil2D[0][0] - pupil) - (head_pose[0][0] - pupil)
 
-            return gaze, eye_pupil2D, head_pose
+            # Draw the gaze vector
+            cv.line(frame, (int(pupil[0]), int(pupil[1])), (int(gaze[0] ), int(gaze[1])), (255, 0, 255), 2)
 
-        # Calculate gaze for left eye
-        left_gaze, left_eye_pupil2D, left_head_pose = calculate_gaze(left_pupil, Eye_ball_center_left)
+            return gaze
 
-        # Calculate gaze for right eye
-        right_gaze, right_eye_pupil2D, right_head_pose = calculate_gaze(right_pupil, Eye_ball_center_right)
+        def calculate_head_pose(nose_tip):
+            # Project nose tip image point into 3D world coordinates
+            nose_tip_world_cord = transformation @ np.array([[nose_tip[0], nose_tip[1], 0, 1]]).T
 
-        # Compute average gaze direction (gaze_x, gaze_y)
-        avg_gaze_x = (left_gaze[0] + right_gaze[0]) / 2
-        avg_gaze_y = (left_gaze[1] + right_gaze[1]) / 2
+            # Head direction vector
+            head_direction_3D = np.array([[0], [0], [1]])  # This represents the direction the head is facing in 3D space
 
-        # Normalize avg_gaze_x and avg_gaze_y to the range -100 to 100
-        gaze_x = normalize_to_range(avg_gaze_x, 0, frame.shape[1], -100, 100)
-        gaze_y = normalize_to_range(avg_gaze_y, 0, frame.shape[0], -100, 100)
+            # Normalize the head direction vector
+            normalized_head_direction = normalize_vector(head_direction_3D)
 
-        # Compute the deviation of the eyes from where the head is pointing separately for each eye
-        pos_x_left = normalize_to_range(left_gaze[0] - center[0], -center[0], center[0], -100, 100)
-        pos_y_left = normalize_to_range(left_gaze[1] - center[1], -center[1], center[1], -100, 100)
+            # Project the normalized 3D head direction onto the image plane
+            S = nose_tip_world_cord + normalized_head_direction * 200  # Scale to a consistent length
+            nose_direction_2D, _ = cv.projectPoints(S.T, rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
-        pos_x_right = normalize_to_range(right_gaze[0] - center[0], -center[0], center[0], -100, 100)
-        pos_y_right = normalize_to_range(right_gaze[1] - center[1], -center[1], center[1], -100, 100)
+            # Project 3D nose tip position (head pose) into the image plane
+            head_pose, _ = cv.projectPoints((nose_tip_world_cord.T[:, :3]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
-        # Calculate proximity based on the difference in gaze vectors
-        gaze_difference = np.linalg.norm(np.array(right_gaze) - np.array(left_gaze))
-        proximity = normalize_to_range(gaze_difference, 0, frame.shape[1], 100, 0)  # Reverse the range
+            # Calculate the head direction vector on the 2D image plane
+            head_direction = nose_tip + (nose_direction_2D[0][0] - nose_tip) - (head_pose[0][0] - nose_tip)
 
-        # Draw gaze lines into the screen for both eyes
-        cv2.line(frame, (int(left_pupil[0]), int(left_pupil[1])), (int(left_gaze[0]), int(left_gaze[1])), (255, 0, 255), 2)
-        cv2.line(frame, (int(right_pupil[0]), int(right_pupil[1])), (int(right_gaze[0]), int(right_gaze[1])), (255, 0, 255), 2)
+            # Draw the vector on the image frame
+            cv.line(frame, (int(nose_tip[0]), int(nose_tip[1])), (int(head_direction[0]), int(head_direction[1])), (0, 0, 0), 2)
 
-        '''
-        print("Gaze X, Gaze Y:", gaze_x, gaze_y)
-        print("Position X (Left), Position Y (Left):", pos_x_left, pos_y_left)
-        print("Position X (Right), Position Y (Right):", pos_x_right, pos_y_right)
-        print("Proximity:", proximity)
-        '''
+            return head_direction
+
+        absGaze_leftEye = calculate_gaze(left_pupil, Eye_ball_center_left, nose_tip)
+        absGaze_rightEye = calculate_gaze(right_pupil, Eye_ball_center_right, nose_tip)
+        head_pose = calculate_head_pose(nose_tip)
+
+        # Center coordinates so [0,0] is the middle of the frame
+        absGaze_leftEye = absGaze_leftEye - frame_center
+        absGaze_rightEye = absGaze_rightEye - frame_center
+        head_pose = head_pose - frame_center
+
+        # Inverse y-direction, so positive = up
+        absGaze_leftEye[1] = -absGaze_leftEye[1]
+        absGaze_rightEye[1] = -absGaze_rightEye[1]
+        head_pose[1] = -head_pose[1]
+ 
+        # Calculate relative gaze by subtracting head pose from absolute gaze
+        relGaze_leftEye = absGaze_leftEye - head_pose
+        relGaze_rightEye = absGaze_rightEye - head_pose
+
+        # Calculate Point of Gaze (PoG) as the average of the left and right absolute gaze positions
+        PoG = (absGaze_leftEye + absGaze_rightEye) / 2
+
+        # Calculate Vergence as the Euclidean distance between the left and right absolute gaze positions
+        vergence = np.linalg.norm(absGaze_leftEye - absGaze_rightEye)
 
     else:
-        gaze_x, gaze_y, pos_x_left, pos_y_left, pos_x_right, pos_y_right, proximity = None, None, None, None, None, None, None
+        absGaze_rightEye, absGaze_leftEye, PoG, head_pose, relGaze_rightEye, relGaze_leftEye = (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)
+        vergence = None
 
-    return gaze_x, gaze_y, pos_x_left, pos_y_left, pos_x_right, pos_y_right, proximity
+    return absGaze_rightEye, absGaze_leftEye, PoG, vergence, head_pose, relGaze_rightEye, relGaze_leftEye
+

@@ -1,6 +1,7 @@
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
+from tqdm import tqdm  # Importing tqdm for the progress bar
 import os
 
 os.environ["OPENCV_FFMPEG_DEBUG"] = "0"
@@ -22,6 +23,7 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
     best_face_detection_ratio = 0
     all_bboxes = []
 
+    cv.startWindowThread()
     for start_frame in possible_starts:
         cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)
         detected_faces = 0
@@ -65,6 +67,7 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
                                 y2 = min(h, max(0, y2 + padding_y))  # Ensure within bounds
 
                         all_bboxes.append([x1, y1, x2, y2])
+        cv.waitKey(1)
 
         # Calculate the face detection ratio for this start frame
         if total_frames > 0:
@@ -74,6 +77,7 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
                 best_start_frame = start_frame
 
     cap.release()
+    cv.destroyAllWindows()
 
     if not all_bboxes:
         raise ValueError("Could not detect a face in the video.")
@@ -106,7 +110,6 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
         output_video_path = os.path.join(output_path, 'STEP1_crop_video_to_face.avi')
         out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
 
-        window_title = f"Detection Conf: {min_detection_confidence}, Padding: {percent_padding}, Shift: {crop_shift}"
         cv.startWindowThread()
         for _ in range(duration_frames):
             ret, frame = cap.read()
@@ -115,26 +118,30 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
 
             cv.rectangle(frame, (final_bbox[0], final_bbox[1]), (final_bbox[2], final_bbox[3]), (0, 255, 0), 2)
             out.write(frame)
-            cv.imshow(window_title, frame)
+            cv.imshow(frame)
             cv.waitKey(1)
 
+        cv.waitKey(1)
         cap.release()
         out.release()
         cv.destroyAllWindows()
 
+        ##########################
         cap_full = cv.VideoCapture(video_path)
         num_frames = int(cap_full.get(cv.CAP_PROP_FRAME_COUNT))
         out_full = cv.VideoWriter(os.path.join(output_path, 'cropped_fullVideo.avi'), fourcc, fps, (final_bbox[2] - final_bbox[0], final_bbox[3] - final_bbox[1]))
         cv.startWindowThread()
-        for _ in range(num_frames):
-            ret, frame = cap_full.read()
-            if not ret:
-                break
+        with tqdm(total=num_frames, desc="Cropping full video") as pbar:
+            for _ in range(num_frames):
+                ret, frame = cap_full.read()
+                if not ret:
+                    break
+            
+                pbar.update(1)
+                cropped_frame = frame[final_bbox[1]:final_bbox[3], final_bbox[0]:final_bbox[2]]
+                out_full.write(cropped_frame)
 
-            cropped_frame = frame[final_bbox[1]:final_bbox[3], final_bbox[0]:final_bbox[2]]
-            out_full.write(cropped_frame)
-            cv.waitKey(1)
-
+        cv.waitKey(1)
         cap_full.release()
         out_full.release()
         cv.destroyAllWindows()

@@ -2,5 +2,5 @@
     "data_path": "/Users/kendranoneman/OneDrive/EyeMovement",
     "out_path": "/Users/kendranoneman/OneDrive/EyeMovement_wTracking",
     "crop_video_based_on_face_detection": true,
-    "helpers_to_run": ["extract_patient_info2"]
+    "helpers_to_run": ["extract_patient_info","normalize_gaze"]
 }

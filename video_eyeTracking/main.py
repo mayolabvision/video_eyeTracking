@@ -137,28 +137,33 @@ def main(video_relative_path=None):
 
         # If the thread is still alive (i.e., no input), assume 'y'
         if input_thread.is_alive():
-            overwrite[0] = True
+            overwrite[0] = False
 
         if overwrite[0]:
             if args.min_detection_confidence and args.min_tracking_confidence:
-                min_detection_confidence, min_tracking_confidence = extract_face_landmarks(video_path, min_detection_confidence=args.min_detection_confidence, min_tracking_confidence=args.min_tracking_confidence, output_path=output_path)
+                min_detection_confidence, min_tracking_confidence, frame_width, frame_height = extract_face_landmarks(video_path, min_detection_confidence=args.min_detection_confidence, min_tracking_confidence=args.min_tracking_confidence, output_path=output_path)
             else:
-                min_detection_confidence, min_tracking_confidence = extract_face_landmarks(video_path, output_path=output_path)
+                min_detection_confidence, min_tracking_confidence, frame_width, frame_height = extract_face_landmarks(video_path, output_path=output_path)
             params['min_detection_confidence'] = min_detection_confidence
             params['min_tracking_confidence'] = min_tracking_confidence
+            params['frame_width'] = frame_width
+            params['frame_height'] = frame_height
             save_params(params, output_path)
             redo_plot_gaze = True
             print("STEP 2 COMPLETE. Gaze and face landmarks extracted from video.")
         else:
             print("STEP 3 SKIPPED. Not overwriting gaze and face landmarks.")
             redo_plot_gaze = False
+            params = load_params(output_path)
     else:
         if args.min_detection_confidence and args.min_tracking_confidence:
-            min_detection_confidence, min_tracking_confidence = extract_face_landmarks(video_path, min_detection_confidence=args.min_detection_confidence, min_tracking_confidence=args.min_tracking_confidence, output_path=output_path)
+            min_detection_confidence, min_tracking_confidence, frame_width, frame_height = extract_face_landmarks(video_path, min_detection_confidence=args.min_detection_confidence, min_tracking_confidence=args.min_tracking_confidence, output_path=output_path)
         else:
-            min_detection_confidence, min_tracking_confidence = extract_face_landmarks(video_path, output_path=output_path)
+            min_detection_confidence, min_tracking_confidence, frame_width, frame_height = extract_face_landmarks(video_path, output_path=output_path)
         params['min_detection_confidence'] = min_detection_confidence
         params['min_tracking_confidence'] = min_tracking_confidence
+        params['frame_width'] = frame_width
+        params['frame_height'] = frame_height
         save_params(params, output_path)
         redo_plot_gaze = True
         print("STEP 2 COMPLETE. Gaze and face landmarks extracted from video.")
@@ -175,7 +180,7 @@ def main(video_relative_path=None):
     # Check if STEP3_plot_gaze.avi exists and prompt to overwrite
     plot_file_path = os.path.join(output_path, "STEP3_plot_gaze.avi")
     if redo_plot_gaze or not os.path.exists(plot_file_path):
-        plot_gaze(gaze_data, output_path=output_path)
+        plot_gaze(gaze_data, params['frame_width'], params['frame_height'], output_path=output_path)
         print("STEP 3 COMPLETE. Gaze and eye position plotted.")
     else:
         overwrite_plot = [False] 
@@ -194,7 +199,7 @@ def main(video_relative_path=None):
             overwrite_plot[0] = True
 
         if overwrite_plot[0]:
-            plot_gaze(gaze_data, output_path=output_path)
+            plot_gaze(gaze_data, params['frame_width'], params['frame_height'], output_path=output_path)
             print("STEP 3 COMPLETE. Gaze and eye position plotted.")
         else:
             print("STEP 3 SKIPPED. Gaze and eye position already plotted.")

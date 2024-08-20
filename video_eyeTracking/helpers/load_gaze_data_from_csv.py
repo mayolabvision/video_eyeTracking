@@ -1,4 +1,3 @@
-# video_eyeTracking/helpers/load_gaze_data_from_csv.py
 import csv
 
 def load_gaze_data_from_csv(csv_file_path):

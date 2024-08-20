@@ -6,7 +6,6 @@ import os
 import csv
 import time
 from tqdm import tqdm  # Importing tqdm for the progress bar
-from .landmarks import LEFT_EYE_IRIS, RIGHT_EYE_IRIS, LEFT_EYE_OUTER_CORNER, RIGHT_EYE_OUTER_CORNER, _indices_pose
 from .head_pose import vector_position, estimate_head_pose
 from .gaze import gaze
 
@@ -24,11 +23,14 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
     cap = cv.VideoCapture(video_path)
     fps = int(cap.get(cv.CAP_PROP_FPS))
     num_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    frame_width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 
+    cv.startWindowThread()
     if output_path:
         fourcc = cv.VideoWriter_fourcc(*'XVID')
         output_video_path = os.path.join(output_path, 'STEP2_face_landmarks_tracking.avi')
-        out = cv.VideoWriter(output_video_path, fourcc, fps, (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
+        out = cv.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
     land_data, gaze_data = [],[]
     column_names = ["Frame Number","Time Aligned to Video Start (ms)"]
@@ -41,20 +43,23 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
         "Frame Number",                             # Frame index, no units.
         "Time Aligned to Video Start (ms)",                           # Time in milliseconds.
 
-        "Horizontal Gaze (-100,100)",               # Horizontal direction of gaze in the room, normalized.
-        "Vertical Gaze (-100,100)",                 # Vertical direction of gaze in the room, normalized.
+        "Absolute Gaze (right,x)", # [-100,100]
+        "Absolute Gaze (right,y)", 
+        "Absolute Gaze (left,x)",  
+        "Absolute Gaze (left,y)",
+        "Point of Gaze (x)",
+        "Point of Gaze (y)", 
+        "Vergence Distance",
+        "Head Pose (x)",
+        "Head Pose (y)",
+        "Relative Gaze (right,x)", # [-100,100]
+        "Relative Gaze (right,y)",
+        "Relative Gaze (left,x)",
+        "Relative Gaze (left,y)"
+        ]
+    #ag_right_x,ag_right_y,ag_left_x,ag_left_y,pog_x,pog_y,vergence,head_x, head_y,rg_right_x,rg_right_y,rg_left_x,rg_left_y = gaze(frame, results.multi_face_landmarks[0])
 
-        "Horizontal Deviation (Left Eye)",          # Horizontal deviation of left eye from head direction, normalized.
-        "Vertical Deviation (Left Eye)",            # Vertical deviation of left eye from head direction, normalized.
-
-        "Horizontal Deviation (Right Eye)",         # Horizontal deviation of right eye from head direction, normalized.
-        "Vertical Deviation (Right Eye)",           # Vertical deviation of right eye from head direction, normalized.
-
-        "Gaze Distance (0,100)",                   # Estimated distance of gaze target, 0 (close) to 100 (far).
-    ]
-
-    initial_pitch, initial_yaw, initial_roll = 0, 0, 0
-    with tqdm(total=num_frames, desc="Processing Frames") as pbar:
+    with tqdm(total=num_frames, desc="Extracting face landmarks") as pbar:
         for thisFrame in range(num_frames):
             ret, frame = cap.read()
             timestamp = (thisFrame+1) * (1/fps)
@@ -88,8 +93,9 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
                     [[n.x, n.y, n.z] for n in results.multi_face_landmarks[0].landmark])
 
                 # Gaze estimation 
-                gaze_x, gaze_y, pos_x_left, pos_y_left, pos_x_right, pos_y_right, proximity = gaze(frame, results.multi_face_landmarks[0]) # gaze estimation
-
+                absGaze_rightEye, absGaze_leftEye, PoG, vergence, head_pose, relGaze_rightEye, relGaze_leftEye = gaze(frame, results.multi_face_landmarks[0])
+                #ag_right_x,ag_right_y,ag_left_x,ag_left_y,pog_x,pog_y,vergence,head_x,head_y,rg_right_x,rg_right_y,rg_left_x,rg_left_y = gaze(frame, results.multi_face_landmarks[0])
+                
                 # entry for landmark data
                 land_log_entry = [(thisFrame+1),timestamp]
                 land_log_entry.extend([p for point in mesh_points for p in point])
@@ -97,8 +103,7 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
 
                 gaze_log_entry = [
                     (thisFrame + 1), timestamp,
-                    gaze_x, gaze_y, pos_x_left, pos_y_left, pos_x_right, pos_y_right, proximity
-                ]
+                    absGaze_rightEye[0],absGaze_rightEye[1],absGaze_leftEye[0],absGaze_leftEye[1],PoG[0],PoG[1],vergence,head_pose[0],head_pose[1],relGaze_rightEye[0],relGaze_rightEye[1],relGaze_leftEye[0],relGaze_leftEye[1]]
                 gaze_data.append(gaze_log_entry)
 
             else:
@@ -117,9 +122,10 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
             else:
                 cv.imshow('MediaPipe Face Mesh', cv.flip(frame, 1))
 
-            if cv.waitKey(1) & 0xFF == 27:
-                break
+            cv.waitKey(1)
 
+    for i in range(10):
+        cv.waitKey(1)
     cap.release()
     if output_path:
         out.release()
@@ -138,5 +144,7 @@ def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_trackin
         writer = csv.writer(file)
         writer.writerow(gaze_columns)  # Writing intuitive column names
         writer.writerows(gaze_data)  # Writing data rows
+    
+    cv.destroyAllWindows()
 
-    return min_detection_confidence, min_tracking_confidence
+    return min_detection_confidence, min_tracking_confidence, frame_width, frame_height

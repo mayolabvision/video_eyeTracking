@@ -60,6 +60,7 @@
 ### Built With
 
 * [![Next][Next.js]][Next-url]
+* [![Python][Python.com]][Python-url]
 * [![React][React.js]][React-url]
 * [![Vue][Vue.js]][Vue-url]
 * [![Angular][Angular.io]][Angular-url]
@@ -216,6 +217,8 @@ Project Link: [https://github.com/mayolabvision/video_eyeTracking](https://githu
 [banner]: https://github.com/mayolabvision/.github/blob/main/mayolab-logo.png
 [website]: https://www.mayolab.net/research
 [twitter]: https://twitter.com/mayo_lab
+[Python.com]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org
 
 # video_eyeTracking_ECoG
 

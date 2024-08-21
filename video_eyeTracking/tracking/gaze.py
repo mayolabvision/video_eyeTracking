@@ -73,6 +73,7 @@ def gaze(frame, points):
     # Transformation between image point to world point
     _, transformation, _ = cv.estimateAffine3D(image_points1, model_points)  # image to world transformation
 
+    scale_factor = int(frame.shape[1]/8)
     if transformation is not None:  # if estimateAffine3D succeeded
         def calculate_gaze(pupil, Eye_ball_center, nose_tip):
             # Project pupil image point into 3D world coordinates
@@ -85,7 +86,7 @@ def gaze(frame, points):
             normalized_gaze_direction = normalize_vector(gaze_direction_3D)
 
             # Project the normalized 3D gaze direction onto the image plane
-            S = Eye_ball_center + normalized_gaze_direction * 200  # Scale to a consistent length
+            S = Eye_ball_center + normalized_gaze_direction * scale_factor  # Scale to a consistent length
             eye_pupil2D, _ = cv.projectPoints(S.T, rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
             # Project 3D head pose into the image plane
@@ -110,7 +111,7 @@ def gaze(frame, points):
             normalized_head_direction = normalize_vector(head_direction_3D)
 
             # Project the normalized 3D head direction onto the image plane
-            S = nose_tip_world_cord + normalized_head_direction * 200  # Scale to a consistent length
+            S = nose_tip_world_cord + normalized_head_direction * scale_factor  # Scale to a consistent length
             nose_direction_2D, _ = cv.projectPoints(S.T, rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
             # Project 3D nose tip position (head pose) into the image plane

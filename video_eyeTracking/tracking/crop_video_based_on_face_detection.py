@@ -6,7 +6,7 @@ import os
 
 os.environ["OPENCV_FFMPEG_DEBUG"] = "0"
 
-def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95, percent_padding=[0.2, 0.2], crop_shift=[0, 0], duration=10, repeats=10, output_path=None):
+def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95, percent_padding=0.2, crop_shift=[0, 0], duration=10, repeats=10, output_path=None):
     print('------------ CROPPING VIDEO TO FACE ------------')
 
     mp_face_detection = mp.solutions.face_detection
@@ -47,24 +47,14 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
                         x2 = x1 + int(bboxC.width * w)
                         y2 = y1 + int(bboxC.height * h)
 
-                        padding_x = int(bboxC.width * w * percent_padding[0])
-                        padding_y = int(bboxC.height * h * percent_padding[1])
+                        padding_x = int(bboxC.width * w * percent_padding)
+                        padding_y = int(bboxC.height * h * percent_padding)
 
-                        if percent_padding[0] != 0:  # Handle padding_x only if it's not zero
-                            if padding_x > 0:
-                                x1 = max(0, x1 - padding_x)
-                                x2 = min(w, x2 + padding_x)
-                            elif padding_x < 0:
-                                x1 = max(0, min(w, x1 - padding_x))  # Ensure within bounds
-                                x2 = min(w, max(0, x2 + padding_x))  # Ensure within bounds
-
-                        if percent_padding[1] != 0:  # Handle padding_y only if it's not zero
-                            if padding_y > 0:
-                                y1 = max(0, y1 - padding_y)
-                                y2 = min(h, y2 + padding_y)
-                            elif padding_y < 0:
-                                y1 = max(0, min(h, y1 - padding_y))  # Ensure within bounds
-                                y2 = min(h, max(0, y2 + padding_y))  # Ensure within bounds
+                        if percent_padding != 0:
+                            x1 = max(0, x1 - padding_x)
+                            x2 = min(w, x2 + padding_x)
+                            y1 = max(0, y1 - padding_y)
+                            y2 = min(h, y2 + padding_y)
 
                         all_bboxes.append([x1, y1, x2, y2])
         cv.waitKey(1)
@@ -101,6 +91,25 @@ def crop_video_based_on_face_detection(video_path, min_detection_confidence=0.95
         min(w, int(np.max(filtered_bboxes[:, 2]) + crop_shift[0])),
         min(h, int(np.max(filtered_bboxes[:, 3]) - crop_shift[1]))
     ]
+
+    # Adjust the dimensions of final_bbox to match the original aspect ratio
+    original_aspect_ratio = w / h
+    bbox_width = final_bbox[2] - final_bbox[0]
+    bbox_height = final_bbox[3] - final_bbox[1]
+    bbox_aspect_ratio = bbox_width / bbox_height
+
+    if bbox_aspect_ratio > original_aspect_ratio:
+        # Increase height to match the aspect ratio
+        new_height = int(bbox_width / original_aspect_ratio)
+        height_diff = new_height - bbox_height
+        final_bbox[1] = max(0, final_bbox[1] - height_diff // 2)
+        final_bbox[3] = min(h, final_bbox[3] + height_diff // 2)
+    elif bbox_aspect_ratio < original_aspect_ratio:
+        # Increase width to match the aspect ratio
+        new_width = int(bbox_height * original_aspect_ratio)
+        width_diff = new_width - bbox_width
+        final_bbox[0] = max(0, final_bbox[0] - width_diff // 2)
+        final_bbox[2] = min(w, final_bbox[2] + width_diff // 2)
 
     if output_path and best_start_frame is not None:
         cap = cv.VideoCapture(video_path)

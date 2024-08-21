@@ -9,7 +9,7 @@ import matplotlib
 # Use a non-interactive backend for macOS to avoid threading issues
 matplotlib.use('Agg')
 
-def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_duration=1.0, fps=30, dpi=200):
+def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_duration=1.0, fps=30, dpi=150):
     """ 
     Creates a video with a Cartesian plot of absolute gaze (left and right) and head pose.
 
@@ -52,8 +52,7 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
             head_pose_y.append(None)
 
     # Setup the figure
-    fig, ax = plt.subplots(figsize=(frame_width / 100, frame_height / 100), dpi=dpi)
-    ax.set_aspect(aspect='auto')
+    fig, ax = plt.subplots(figsize=(8, 8), dpi=dpi)
 
     x_min = int(np.nanmin(np.array((abs_gaze_right_x + abs_gaze_left_x + head_pose_x),dtype=np.float64)))
     y_min = int(np.nanmin(np.array((abs_gaze_right_y + abs_gaze_left_y + head_pose_y),dtype=np.float64)))
@@ -66,9 +65,6 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
     line_head_pose, = ax.plot([], [], '-', color='black', markersize=5, alpha=0.5, label='Head Pose')
 
     filtered_verg = [v for v in verg if v is not None]
-
-    # Adjust the layout to make room for the legend
-    ax.legend(loc='lower center', bbox_to_anchor=(1, 0.5))
     
     # Create the progress bar
     with tqdm(total=len(abs_gaze_left_x), desc="Creating Animation") as pbar:
@@ -76,11 +72,6 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
         # Update function for the animation
         def update(num, abs_gaze_left_x, abs_gaze_left_y, abs_gaze_right_x, abs_gaze_right_y, head_pose_x, head_pose_y, timestamps):
             ax.clear()
-            ax.set_aspect(aspect='auto')
-            ax.set_xlim(x_min-1, x_max+1)
-            ax.set_ylim(y_min-1, y_max+1)
-            ax.set_xlabel('Horizontal Position (pix)')
-            ax.set_ylabel('Vertical Position (pix)')
 
             # Determine how many frames to include in the fading effect
             fade_frames = int(fps * fade_duration)
@@ -134,9 +125,6 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
             ax.set_xlabel('Horizontal Position (pix)')
             ax.set_ylabel('Vertical Position (pix)')
 
-            # Adjust the layout to make room for the legend
-            plt.subplots_adjust(right=0.75)
-            
             # Update the common title with the timestamp
             fig.suptitle(f'Time: {round(timestamps[num], 1)} s', fontsize=16)
 

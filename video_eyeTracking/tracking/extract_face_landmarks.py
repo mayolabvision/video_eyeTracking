@@ -12,7 +12,7 @@ from .gaze import gaze
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
-def extract_face_landmarks(video_path, min_detection_confidence=0.9, min_tracking_confidence=0.9, output_path=None):
+def extract_face_landmarks(video_path, min_detection_confidence=0.5, min_tracking_confidence=0.5, output_path=None):
     print('------------ EXTRACTING FACE LANDMARKS ------------')
     mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
         max_num_faces=1,

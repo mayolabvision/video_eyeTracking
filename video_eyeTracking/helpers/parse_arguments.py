@@ -3,7 +3,8 @@ import argparse
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Process a specific video for gaze tracking.")
-    parser.add_argument("video_relative_path", type=str, nargs='?', default=None, help="Relative path to the specific video file within the data directory.")
+    parser.add_argument("patient_ID", type=str, nargs='?', default=None, help="Relative path to the specific video file within the data directory.")
+    parser.add_argument("seizure_ID", type=int, nargs='?', default=None, help="Relative path to the specific video file within the data directory.")
     parser.add_argument("--config", type=str, default=None, help="Path to an alternative config file.")
     parser.add_argument("--step", type=int, default=None, help="Last step you wish to complete, so if you put 3 it'll run steps 1-3.")
     parser.add_argument("--direct_video_path", type=str, default=None, help="Direct path to a video file, bypassing config data_path.")

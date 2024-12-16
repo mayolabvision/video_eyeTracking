@@ -52,7 +52,7 @@ def plot_gaze(gaze_data, frame_width, frame_height, output_path=None, fade_durat
             head_pose_y.append(None)
 
     # Setup the figure
-    fig, ax = plt.subplots(figsize=(8, 8), dpi=dpi)
+    fig, ax = plt.subplots(figsize=(7, 7), dpi=dpi)
 
     x_min = int(np.nanmin(np.array((abs_gaze_right_x + abs_gaze_left_x + head_pose_x),dtype=np.float64)))
     y_min = int(np.nanmin(np.array((abs_gaze_right_y + abs_gaze_left_y + head_pose_y),dtype=np.float64)))

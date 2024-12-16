@@ -11,7 +11,7 @@ def normalize_vector(vec):
        return vec
     return vec / norm
 
-def gaze(frame, points):
+def gaze(frame, points, iris_distance=200):
     """ 
     The gaze function gets an image and face landmarks from mediapipe framework.
     The function calculates gaze, position (for each eye), and proximity within a range of 0 to 100.
@@ -73,7 +73,7 @@ def gaze(frame, points):
     # Transformation between image point to world point
     _, transformation, _ = cv.estimateAffine3D(image_points1, model_points)  # image to world transformation
 
-    scale_factor = int(frame.shape[1]/8)
+    scale_factor = 200
     if transformation is not None:  # if estimateAffine3D succeeded
         def calculate_gaze(pupil, Eye_ball_center, nose_tip):
             # Project pupil image point into 3D world coordinates

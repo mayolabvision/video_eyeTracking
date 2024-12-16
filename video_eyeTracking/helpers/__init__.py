@@ -1,19 +1,17 @@
-from .make_output_directory import make_output_directory
-from .extract_patient_info import extract_patient_info
-from .prompt_user_to_overwrite import prompt_user_to_overwrite
-from .load_gaze_data_from_csv import load_gaze_data_from_csv
-from .load_config import load_config
-from .save_params import save_params
-from .load_params import load_params
 from .parse_arguments import parse_arguments
+from .load_config import load_config
+from .compile_path import compile_path
+from .get_clip_details import get_clip_details
+from .concat_videos import concat_videos
+from .load_params import load_params
+from .save_params import save_params
 
 __all__ = [
-    "extract_patient_info",
-    "make_output_directory",
-    "prompt_user_to_overwrite",
-    "load_gaze_data_from_csv",
+    "parse_arguments",
     "load_config",
-    "save_params",
-    "load_params",
-    "parse_arguments"
+    "compile_path",
+    "get_clip_details",
+    "concat_videos",
+    "load_params", 
+    "save_params"
 ]

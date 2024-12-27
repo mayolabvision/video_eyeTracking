@@ -83,6 +83,109 @@ The output file EYE_GAZE_LOGS.csv includes the following columns:
 
 At the end of the process, a video called SUMMARY_VID.avi is generated. This video shows the subject with the estimated absolute gaze position for each eye and head pose represented as vectors (in the left subpanel), and these values are plotted on Cartesian axes.
 
+# Gaze Function Output Description
+
+The `gaze` function calculates several outputs related to eye and head movement. Below is a detailed description of each output, including how it is calculated, the landmarks used, and the range of values.
+
+## Outputs
+
+### 1. Absolute Gaze (`absGaze_rightEye` and `absGaze_leftEye`)
+- **Description**: 
+  - Represents the 2D gaze direction of each eye (left and right) relative to the image frame.
+  - Calculated independently for each eye.
+- **Calculation**:
+  - Uses the **pupil position**:
+    - `landmark[468]` for the left eye.
+    - `landmark[473]` for the right eye.
+  - Projects the pupil position into 3D world coordinates using the transformation matrix.
+  - Calculates the normalized 3D gaze direction from the **eyeball center**:
+    - `Eye_ball_center_left` for the left eye.
+    - `Eye_ball_center_right` for the right eye.
+  - Projects the 3D gaze direction back into 2D image space.
+- **Range**:
+  - Values are 2D coordinates relative to the **frame center**:
+    - Positive X values indicate movement to the right.
+    - Positive Y values indicate upward movement (Y-axis is inverted).
+  - The exact range depends on the frame resolution.
+- **Visualization**:
+  - A line is drawn on the frame from the pupil position to the calculated gaze point.
+
+---
+
+### 2. Relative Gaze (`relGaze_rightEye` and `relGaze_leftEye`)
+- **Description**:
+  - Represents the gaze direction of each eye relative to the **head pose**. 
+  - Removes the effect of head movement from the gaze calculation.
+- **Calculation**:
+  - Subtract the **head pose vector** from the **absolute gaze** for each eye.
+- **Range**:
+  - Same as **absolute gaze**, but adjusted to account for head movement.
+- **Visualization**:
+  - No direct visualization in the code, but these values represent the gaze adjusted for head pose.
+
+---
+
+### 3. Point of Gaze (PoG)
+- **Description**:
+  - Represents the average gaze position of both eyes in 2D space.
+  - Indicates where both eyes are collectively looking on the image plane.
+- **Calculation**:
+  - Average of the **absolute gaze** vectors for the left and right eyes:
+    - `PoG = (absGaze_leftEye + absGaze_rightEye) / 2`
+- **Range**:
+  - Same as **absolute gaze**, since it is the midpoint of both gaze vectors.
+- **Visualization**:
+  - No direct visualization, but this is the collective focus point of both eyes.
+
+---
+
+### 4. Vergence
+- **Description**:
+  - Represents the angular difference between the gaze directions of the left and right eyes.
+  - Indicates how much the eyes are converging or diverging.
+- **Calculation**:
+  - Euclidean distance between the **absolute gaze** positions of both eyes:
+    - `vergence = np.linalg.norm(absGaze_leftEye - absGaze_rightEye)`
+- **Range**:
+  - A smaller value indicates more convergence (e.g., focusing on a nearby object).
+  - A larger value indicates divergence (e.g., focusing on a distant object).
+
+---
+
+### 5. Head Pose
+- **Description**:
+  - Represents the 2D direction of the head relative to the image frame.
+  - Calculated based on the **nose tip landmark** (`landmark[4]`).
+- **Calculation**:
+  - Projects the **nose tip** into 3D world coordinates using the transformation matrix.
+  - Normalizes the head direction vector and projects it back into 2D image space.
+- **Range**:
+  - Values are in 2D coordinates relative to the **frame center**.
+  - Positive X values indicate the head is pointing to the right.
+  - Positive Y values indicate the head is pointing up (Y-axis is inverted).
+- **Visualization**:
+  - A line is drawn from the **nose tip** to the calculated head direction on the frame.
+
+---
+
+## Landmarks Used
+
+- **Nose tip**: `landmark[4]`
+- **Left eye**: `landmark[468]` (pupil position), `landmark[263]` (corner).
+- **Right eye**: `landmark[473]` (pupil position), `landmark[33]` (corner).
+- **Chin**: `landmark[152]`
+- **Mouth corners**: `landmark[287]` (left), `landmark[57]` (right).
+
+---
+
+## Notes
+
+1. The **camera matrix** is estimated based on the frame resolution.
+2. **Transformation Matrix**: Used to convert 2D image coordinates to 3D world coordinates and back.
+3. Scale factors are applied to ensure all vectors are proportional.
+
+--- 
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
